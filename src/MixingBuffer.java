@@ -29,7 +29,19 @@ public class MixingBuffer {//placeholder class name for now
                streams[i] = AudioSystem.getAudioInputStream(samples.get(i));
             //have an audio input stream for each sample audio file
 
+            byte[][] streamBytes = new byte[streams.length][];//byte array for each corresponding audio stream
+
             //now need to read each stream byte by byte, add the bytes together (?) - then write to crowds file
+
+            //outer for loop - number of frames?
+            for(int i=0;i<streams.length;i++)
+            {
+                //read a byte from stream and save it in associated bytes array
+            }
+
+            //add each byte together - watch for overflow - increase buffer size?
+
+            //could i somehow involve hash maps here?
         }
         catch (Exception e){
             e.printStackTrace();
