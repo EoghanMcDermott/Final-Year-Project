@@ -39,72 +39,58 @@ public class MixingBuffer {//placeholder class name for now
         return null;//encountered a problem with converting the file to byte array
     }
 
-    private int findLongest(ArrayList<byte[]> arrays){//finding the length of longest byte array
-        int largest=0;
+    private int findLongest(ArrayList<byte[]> arrays) {//finding the length of longest byte array
+        int largest = 0;
 
-        for(byte[] b: arrays)//check each array
+        for (byte[] b : arrays)//check each array
         {
-            if(b.length > largest)
+            if (b.length > largest)
                 largest = b.length;
         }
 
         return largest;//return the length of the longest array - not the byte array itself
     }
 
+        private int findShortest(ArrayList<byte[]> arrays){//finding the length of shortest byte array
+            int shortest=10000000;//arbitrary max value, could use first value either
+
+            for(byte[] b: arrays)//check each array
+            {
+                if(b.length < shortest)//sort of guaranteed the 1st is shortest here
+                    shortest = b.length;
+            }
+
+            return shortest;//return the shortest of the longest array - not the byte array itself
+    }
+
     public void synthesise() {//returns the synthesised crowd
         try{
 
-            AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));
+            AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));//hopefully won't need this after some changes
 
-            byte[] buffer = new byte[6400000];
+            byte[] buffer = new byte[640000000];//arbitrarily large buffer
 
             ArrayList<byte[]> byteArrays = new ArrayList<>();
 
             for(File f: files)
                 byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
 
-            for(int i=0;i<findLongest(byteArrays);i++)//loop the length of the longest byte array
+            for(int i=0;i<findShortest(byteArrays);i++)//loop the length of the shortest byte array so no null pointer exceptions
+                //need to put more time into this loop so that when the end of one file's buffer is reached it keeps adding the rest of the other files
             {
                 byte temp = 0;
 
                 for(byte[] b: byteArrays)
-                    temp += b[i];
+                    temp += b[i];//just lazily adding the files together byte by byte
 
-                buffer[i] = temp;
+                buffer[i] = temp;//storing the added bytes in the buffer
             }
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),40000);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),640000);
+            //need to find a proper value for length and ideally a more static version of the audio format
 
-            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("crowd.wav"));
-
-
-
-//
-//           for(int i=0;i<streams.length;i++)
-//               streams[i] = AudioSystem.getAudioInputStream(samples.get(i));
-//            //have an audio input stream for each sample audio file
-//
-//
-//            AudioFormat format = streams[0].getFormat();
-//            //16 bits so need 2 bytes per sample, with 4 bytes per frame
-//           // format.
-//            System.out.println(format.toString());
-//
-//            byte[][] streamBytes = new byte[streams.length][];//byte array for each corresponding audio stream
-//
-//            streams[1].read();
-//            //now need to read each stream byte by byte, add the bytes together (?) - then write to crowds file
-//
-//            //outer for loop - number of frames?
-//            for(int i=0;i<streams.length;i++)
-//            {
-//                //read a byte from stream and save it in associated bytes array
-//            }
-
-            //add each byte together - watch for overflow - increase buffer size?
-
-            //could i somehow involve hash maps here?
-        }
+            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("crowd.wav"));//writing the out buffer to a file
+      }
         catch (Exception e){
             e.printStackTrace();
         }
