@@ -11,7 +11,7 @@ public class Main {
 
         MixingBuffer mix = new MixingBuffer(v1,v2,v3);//instantiate mixing buffer with audio files
 
-       System.out.println(mix.samplesToString());
+       System.out.println(mix.filesToString());
 
        mix.synthesise();
     }
