@@ -54,6 +54,7 @@ public class MixingBuffer {//placeholder class name for now
     public void synthesise() {//returns the synthesised crowd
         try{
 
+            AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));
 
             byte[] buffer = new byte[6400000];
 
@@ -72,7 +73,9 @@ public class MixingBuffer {//placeholder class name for now
                 buffer[i] = temp;
             }
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),AudioSystem.getAudioFileFormat(files.get(0)),);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),40000);
+
+            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("crowd.wav"));
 
 
 
