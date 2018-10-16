@@ -51,7 +51,7 @@ public class MixingBuffer {//placeholder class name for now
         return largest;//return the length of the longest array - not the byte array itself
     }
 
-        private int findShortest(ArrayList<byte[]> arrays){//finding the length of shortest byte array
+    private int findShortest(ArrayList<byte[]> arrays){//finding the length of shortest byte array
             int shortest=10000000;//arbitrary max value, could use first value either
 
             for(byte[] b: arrays)//check each array
@@ -81,12 +81,17 @@ public class MixingBuffer {//placeholder class name for now
                 byte temp = 0;
 
                 for(byte[] b: byteArrays)
-                    temp += b[i];//just lazily adding the files together byte by byte
+                {
+                    if(i <= b.length)//avoid null pointer exceptions
+                    {
+                        temp += b[i];//just lazily adding the files together byte by byte
+                    }
+                }
 
                 buffer[i] = temp;//storing the added bytes in the buffer
             }
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),640000);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),156000);
             //need to find a proper value for length and ideally a more static version of the audio format
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("crowd.wav"));//writing the out buffer to a file
@@ -96,5 +101,26 @@ public class MixingBuffer {//placeholder class name for now
         }
 
         return;
+    }
+
+    public void play(){//method to play our newly synthesised crowd audio file
+
+        try{
+            Clip clip = AudioSystem.getClip();
+
+            clip.open(AudioSystem.getAudioInputStream(new File("crowd.wav")));
+
+            clip.start();
+
+            System.out.println("Now playing: crowd.wav" );
+
+            Thread.sleep( clip.getMicrosecondLength()/1000);//need the program to keep running until the sound is played
+            //microseconds vs miliseconds so need to divide by 1000
+
+            System.out.println("Playback finished");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
