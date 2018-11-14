@@ -1,7 +1,14 @@
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MixingBuffer {//placeholder class name for now
 
@@ -63,10 +70,63 @@ public class MixingBuffer {//placeholder class name for now
             return shortest;//return the shortest of the longest array - not the byte array itself
     }
 
-    public void synthesise() {//returns the synthesised crowd
+    public void generateSoft()
+    {
+        //maybe reduce gain and intensity for this?
+        populate("soft");
+        synthesise("soft.wav");
+    }
+
+    public void generateNormal()
+    {
+        populate("normal");
+        synthesise("normal.wav");
+    }
+
+    public void generateShout()
+    {
+        populate("shout");
+        //AudioSystem.intensityfiles.get(i)
+        synthesise("shout.wav");
+    }
+
+    private void populate(String inputType)
+    {
+        boolean validInput = true;
+
+        File dir = new File("resources");//need to give a default value - here it is all of the samples
+
+        //check if we want a normal, soft or shouting crowd
+        if(inputType.equals("normal"))
+        {
+           dir = new File("resources/normal/");
+        }
+        else if(inputType.equals("soft"))
+        {
+           dir = new File("resources/soft/");
+        }
+        else if(inputType.equals("shout"))
+        {
+           dir = new File("resources/shout/");
+        }
+        else//if none of these then the input is invalid
+            validInput = false;
+
+        if(validInput)//if our input is valid then populate file arrays list from given resource folder
+        {
+
+            for(File sample: dir.listFiles())
+                files.add(sample);
+
+            Collections.shuffle(files);//shuffling list to give more varied crowd sounds
+        }
+
+    }
+
+    private void synthesise(String filename) {//returns the synthesised crowd
         try{
 
-            AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));//hopefully won't need this after some changes
+            //AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));//hopefully won't need this after some changes
 
             byte[] buffer = new byte[640000000];//arbitrarily large buffer
 
@@ -91,10 +151,13 @@ public class MixingBuffer {//placeholder class name for now
                 buffer[i] = temp;//storing the added bytes in the buffer
             }
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),test.getFormat(),156000);
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
+            //need to create an audio file format object for this to work properly
+
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),156000);
             //need to find a proper value for length and ideally a more static version of the audio format
 
-            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("crowd.wav"));//writing the out buffer to a file
+            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
       }
         catch (Exception e){
             e.printStackTrace();
@@ -103,16 +166,17 @@ public class MixingBuffer {//placeholder class name for now
         return;
     }
 
-    public void play(){//method to play our newly synthesised crowd audio file
+    public void play(String filename){//method to play our newly synthesised crowd audio file
 
         try{
+            Thread.sleep(500);
             Clip clip = AudioSystem.getClip();
 
-            clip.open(AudioSystem.getAudioInputStream(new File("crowd.wav")));
+            clip.open(AudioSystem.getAudioInputStream(new File(filename)));
 
             clip.start();
 
-            System.out.println("Now playing: crowd.wav" );
+            System.out.println("Now playing: " + filename );
 
             Thread.sleep( clip.getMicrosecondLength()/1000);//need the program to keep running until the sound is played
             //microseconds vs miliseconds so need to divide by 1000

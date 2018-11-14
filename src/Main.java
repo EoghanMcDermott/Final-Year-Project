@@ -1,27 +1,19 @@
-import java.io.File;
-
 public class Main {
 
     public static void main(String args[]){
 
-       File v1 = new File("resources/dwight_1.wav");
-       File v2 = new File("resources/jim.wav");
-       File v3 = new File("resources/pam.wav");
-       File v4 = new File("resources/michael.wav");
-       File v5 = new File("resources/erin.wav");
-       File v6 = new File("resources/oscar.wav");
-       File v7 = new File("resources/phyllis.wav");
-       File v8 = new File("resources/catherine.wav");
-       //audio samples
+       MixingBuffer mix = new MixingBuffer();//instantiate mixing buffer with(out) audio files
 
-       //bit awkward passing the files - maybe just access them directly in mixing buffer class?
+       mix.generateNormal();
+       mix.play("normal.wav");
 
-       MixingBuffer mix = new MixingBuffer(v1,v2,v3,v4,v5,v6,v7,v8);//instantiate mixing buffer with audio files
+       //audio samples are okay but aren't mixed properly together
+       mix.generateSoft();
+       mix.play("soft.wav");
 
-       //System.out.println(mix.filesToString());
+       mix.generateShout();
+       mix.play("shout.wav");
 
-       mix.synthesise();
 
-       mix.play();
     }
 }
