@@ -126,7 +126,7 @@ public class MixingBuffer {//placeholder class name for now
     private void synthesise(String filename) {//returns the synthesised crowd
         try{
 
-            //AudioInputStream test = AudioSystem.getAudioInputStream(files.get(0));//hopefully won't need this after some changes
+            byte empty = 0;//can use this for an offset perhaps?
 
             byte[] buffer = new byte[640000000];//arbitrarily large buffer
 
