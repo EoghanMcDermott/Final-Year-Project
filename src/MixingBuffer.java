@@ -1,7 +1,5 @@
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,29 +133,66 @@ public class MixingBuffer {//placeholder class name for now
             for(File f: files)
                 byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
 
-            for(int i=0;i<findShortest(byteArrays);i++)//loop the length of the shortest byte array so no null pointer exceptions
-                //need to put more time into this loop so that when the end of one file's buffer is reached it keeps adding the rest of the other files
+//            for(int i=0;i<findShortest(byteArrays);i++)//loop the length of the shortest byte array so no null pointer exceptions
+//                //need to put more time into this loop so that when the end of one file's buffer is reached it keeps adding the rest of the other files
+//            {
+//                byte temp = 0;
+//
+//                for(byte[] b: byteArrays)
+//                {
+//                    if(i <= b.length)//avoid null pointer exceptions
+//                    {
+//                        temp += b[i];//just lazily adding the files together byte by byte
+//                    }
+//                }
+//
+//                buffer[i] = temp;//storing the added bytes in the buffer
+//            }
+            byte temp;
+
+//           ByteArrayOutputStream output = new ByteArrayOutputStream();
+//           output.write(byteArrays.get(0),0,byteArrays.get(0).length);
+//           output.write(byteArrays.get(1),0,byteArrays.get(1).length);
+//
+//           byte[] b = output.toByteArray();
+//
+//           output.write(byteArrays.get(1),byteArrays.get(0).length,byteArrays.get(1).length);
+
+            for(int i=0;i<byteArrays.get(0).length;i++)
             {
-                byte temp = 0;
-
-                for(byte[] b: byteArrays)
-                {
-                    if(i <= b.length)//avoid null pointer exceptions
-                    {
-                        temp += b[i];//just lazily adding the files together byte by byte
-                    }
-                }
-
-                buffer[i] = temp;//storing the added bytes in the buffer
+                buffer[i]=byteArrays.get(0)[i];
             }
+
+            int offest = byteArrays.get(0).length * 3/4;
+
+            for(int i=0;i<byteArrays.get(1).length;i++)
+            {
+                buffer[i+offest] += byteArrays.get(1)[i] ;
+            }
+
+
+//            for(int i=0;i<buffer.length;i++)
+//            {
+//                temp = 0;
+//
+//                for(byte[] b : byteArrays)
+//                {
+//                    if(i < b.length)//add bytes  if we can
+//                    {
+//                        temp += b[i];
+//                    }
+//                }
+//            }
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),156000);
+//            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(output.toByteArray()), format.getFormat(), 1560000);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),1560000);
             //need to find a proper value for length and ideally a more static version of the audio format
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
+
       }
         catch (Exception e){
             e.printStackTrace();
