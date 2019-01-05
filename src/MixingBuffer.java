@@ -71,7 +71,8 @@ public class MixingBuffer {//placeholder class name for now
     public void generateOld()
     {
         populate("old");
-        synthesiseOld();
+        synthesise("old_crowd.wav");
+        //synthesiseOld();
     }
 
 
@@ -120,11 +121,14 @@ public class MixingBuffer {//placeholder class name for now
                 buffer[i]=byteArrays.get(0)[i];
             }
 
-            int offest = byteArrays.get(0).length * 3/4;
+            int offest1 = byteArrays.get(0).length * 1/2;
+            int offest2 = byteArrays.get(0).length * 3/4;
 
             for(int i=0;i<byteArrays.get(1).length;i++)
             {
-                buffer[i+offest] += byteArrays.get(1)[i] ;
+                buffer[i+offest1] += byteArrays.get(1)[i] ;
+                buffer[i+offest2] += byteArrays.get(2)[i] ;
+
             }
 
 
