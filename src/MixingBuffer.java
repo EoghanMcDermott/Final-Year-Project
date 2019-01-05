@@ -68,45 +68,24 @@ public class MixingBuffer {//placeholder class name for now
             return shortest;//return the shortest of the longest array - not the byte array itself
     }
 
-    public void generateSoft()
+    public void generateOld()
     {
-        //maybe reduce gain and intensity for this?
-        populate("soft");
-        synthesise("soft.wav");
+        populate("old");
+        synthesiseOld();
     }
 
-    public void generateNormal()
-    {
-        populate("normal");
-        synthesise("normal.wav");
-    }
 
-    public void generateShout()
-    {
-        populate("shout");
-        //AudioSystem.intensityfiles.get(i)
-        synthesise("shout.wav");
-    }
-
-    private void populate(String inputType)
+    private void populate(String inputType)//right now only one type of sample to populate
     {
         boolean validInput = true;
 
         File dir = new File("resources");//need to give a default value - here it is all of the samples
 
         //check if we want a normal, soft or shouting crowd
-        if(inputType.equals("normal"))
-        {
-           dir = new File("resources/normal/");
-        }
-        else if(inputType.equals("soft"))
-        {
-           dir = new File("resources/soft/");
-        }
-        else if(inputType.equals("shout"))
-        {
-           dir = new File("resources/shout/");
-        }
+        if(inputType.equals("old"))
+
+            dir = new File("resources/old/");
+
         else//if none of these then the input is invalid
             validInput = false;
 
@@ -133,30 +112,8 @@ public class MixingBuffer {//placeholder class name for now
             for(File f: files)
                 byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
 
-//            for(int i=0;i<findShortest(byteArrays);i++)//loop the length of the shortest byte array so no null pointer exceptions
-//                //need to put more time into this loop so that when the end of one file's buffer is reached it keeps adding the rest of the other files
-//            {
-//                byte temp = 0;
-//
-//                for(byte[] b: byteArrays)
-//                {
-//                    if(i <= b.length)//avoid null pointer exceptions
-//                    {
-//                        temp += b[i];//just lazily adding the files together byte by byte
-//                    }
-//                }
-//
-//                buffer[i] = temp;//storing the added bytes in the buffer
-//            }
-            byte temp;
 
-//           ByteArrayOutputStream output = new ByteArrayOutputStream();
-//           output.write(byteArrays.get(0),0,byteArrays.get(0).length);
-//           output.write(byteArrays.get(1),0,byteArrays.get(1).length);
-//
-//           byte[] b = output.toByteArray();
-//
-//           output.write(byteArrays.get(1),byteArrays.get(0).length,byteArrays.get(1).length);
+            byte temp;
 
             for(int i=0;i<byteArrays.get(0).length;i++)
             {
@@ -170,19 +127,6 @@ public class MixingBuffer {//placeholder class name for now
                 buffer[i+offest] += byteArrays.get(1)[i] ;
             }
 
-
-//            for(int i=0;i<buffer.length;i++)
-//            {
-//                temp = 0;
-//
-//                for(byte[] b : byteArrays)
-//                {
-//                    if(i < b.length)//add bytes  if we can
-//                    {
-//                        temp += b[i];
-//                    }
-//                }
-//            }
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
@@ -199,6 +143,51 @@ public class MixingBuffer {//placeholder class name for now
         }
 
         return;
+    }
+
+    private void synthesiseOld()
+    {
+        try {
+
+            byte empty = 0;//can use this for an offset perhaps?
+
+            byte[] buffer = new byte[6400000];//arbitrarily large buffer
+
+            ArrayList<byte[]> byteArrays = new ArrayList<>();
+
+            for (File f : files)
+                byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
+
+
+            byte temp;
+            for (int i = 0; i < findShortest(byteArrays); i++)//loop the length of the shortest byte array so no null pointer exceptions
+            //need to put more time into this loop so that when the end of one file's buffer is reached it keeps adding the rest of the other files
+            {
+                temp = 0;
+
+                for (byte[] b : byteArrays) {
+                    if (i <= b.length)//avoid null pointer exceptions
+                    {
+                        temp += b[i];//just lazily adding the files together byte by byte
+                    }
+                }
+
+                buffer[i] = temp;//storing the added bytes in the buffer
+            }
+
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
+            //need to create an audio file format object for this to work properly
+
+//            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(output.toByteArray()), format.getFormat(), 1560000);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),156000);
+            //need to find a proper value for length and ideally a more static version of the audio format
+
+            AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File("old_crowd.wav"));//writing the out buffer to a file
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void play(String filename){//method to play our newly synthesised crowd audio file
