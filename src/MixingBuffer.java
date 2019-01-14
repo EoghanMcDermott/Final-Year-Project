@@ -4,10 +4,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 public class MixingBuffer {//placeholder class name for now
 
@@ -109,31 +106,27 @@ public class MixingBuffer {//placeholder class name for now
 
         try{
 
-            byte empty = 0;//can use this for an offset perhaps?
-
             byte[] buffer = new byte[640000000];//arbitrarily large buffer
 
-            ArrayList<byte[]> byteArrays = new ArrayList<>();
+            LinkedList<byte[]> byteArrays = new LinkedList<>();
 
             for(File f: files)
                 byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
 
 
-            byte temp;
+            int offset = 0;//no offset for first sample
 
-            for(int i=0;i<byteArrays.get(0).length;i++)
+            while(!byteArrays.isEmpty())//until every sample has been added - no repetition of samples - change populate method
             {
-                buffer[i]=byteArrays.get(0)[i];
-            }
+                byte[] curr = byteArrays.pop();//get a sample from list
 
-            int offest1 = byteArrays.get(0).length * 1/2;
-            int offest2 = byteArrays.get(0).length * 3/4;
+                for(int i=0;i<curr.length;i++)//iterate through that sample
+                {
+                   buffer[i+offset] += curr[i];
+                }//add a sample to buffer
 
-            for(int i=0;i<byteArrays.get(1).length;i++)
-            {
-                buffer[i+offest1] += byteArrays.get(1)[i] ;
-                buffer[i+offest2] += byteArrays.get(2)[i] ;
-
+                offset = randomiseOffest(curr.length);
+                //get offset for the next sample to be added
             }
 
 
