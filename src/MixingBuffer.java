@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Random;
 
 public class MixingBuffer {//placeholder class name for now
 
@@ -102,6 +103,10 @@ public class MixingBuffer {//placeholder class name for now
     }
 
     private void synthesise(String filename) {//returns the synthesised crowd
+
+        //hey maybe add samples iteratively rather than all at once
+        //wow this might actually be a really good idea - will it work with offsets though?
+
         try{
 
             byte empty = 0;//can use this for an offset perhaps?
@@ -147,6 +152,35 @@ public class MixingBuffer {//placeholder class name for now
         }
 
         return;
+    }
+
+    private int randomiseOffest(int sampleLength)//want to randomly offset different samples
+    {//take in the length of the current sample and return a value for the next sample to use as an offset
+
+        //for now will offset in quarters
+        int offset = 0;
+
+        Random rand = new Random();
+
+        int val = rand.nextInt(3);//return a number in range [1,4]
+
+        switch(val)//depending on the random value generated change the offset
+        {
+            case 0:
+                offset = sampleLength * 1/4;
+                break;
+            case 1:
+                offset = sampleLength * 2/4;
+                break;
+            case 2:
+                offset = sampleLength * 3/4;
+                break;
+            case 3:
+                offset = sampleLength;
+                break;
+        }
+
+        return offset;
     }
 
     private void synthesiseOld()
