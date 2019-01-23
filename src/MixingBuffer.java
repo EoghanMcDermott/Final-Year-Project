@@ -66,6 +66,13 @@ public class MixingBuffer {//placeholder class name for now
             return shortest;//return the shortest of the longest array - not the byte array itself
     }
 
+    public void generateMarcus()
+    {
+        populate("marcus");
+        synthesise("marcus_crowd.wav");
+    }
+
+
     public void generateOld()
     {
         populate("old");
@@ -82,8 +89,10 @@ public class MixingBuffer {//placeholder class name for now
 
         //check if we want a normal, soft or shouting crowd
         if(inputType.equals("old"))
-
             dir = new File("resources/old/");
+
+        else if(inputType.equals("marcus"))
+            dir = new File("resources/marcus/");
 
         else//if none of these then the input is invalid
             validInput = false;
