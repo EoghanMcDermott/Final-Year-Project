@@ -72,6 +72,11 @@ public class MixingBuffer {//placeholder class name for now
         synthesise("marcus_crowd.wav");
     }
 
+    public void generateRod()
+    {
+        populate("rod");
+        synthesise("rod_crowd.wav");
+    }
 
     public void generateOld()
     {
@@ -79,7 +84,6 @@ public class MixingBuffer {//placeholder class name for now
         synthesise("old_crowd.wav");
         //synthesiseOld();
     }
-
 
     private void populate(String inputType)//right now only one type of sample to populate
     {
@@ -93,6 +97,9 @@ public class MixingBuffer {//placeholder class name for now
 
         else if(inputType.equals("marcus"))
             dir = new File("resources/marcus/");
+
+        else if(inputType.equals("rod"))
+            dir = new File("resources/rod/");
 
         else//if none of these then the input is invalid
             validInput = false;

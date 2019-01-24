@@ -4,8 +4,17 @@ public class Main {
 
        MixingBuffer mix = new MixingBuffer();//instantiate mixing buffer with(out) audio files
 
-       //audio samples are okay but aren't mixed properly together
-       mix.generateOld();
-       mix.play("old_crowd.wav");
+       //no overflow issue with old files
+        mix.generateOld();
+        mix.play("old_crowd.wav");
+
+        //horrific static when 3rd sample is added to mix - possibly caused by overflow?
+//        mix.generateMarcus();
+//        mix.play("marcus_crowd.wav");
+//
+//        mix.generateRod();
+//        mix.play("rod_crowd.wav");
+
+
     }
 }
