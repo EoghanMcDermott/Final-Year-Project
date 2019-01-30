@@ -94,7 +94,7 @@ public class MixingBuffer {//placeholder class name for now
 
         //check if we want a normal, soft or shouting crowd
         if(inputType.equals("old"))
-            dir = new File("resources/old/");
+            dir = new File("resources/shortened/");
 
         else if(inputType.equals("marcus"))
             dir = new File("resources/marcus/");
