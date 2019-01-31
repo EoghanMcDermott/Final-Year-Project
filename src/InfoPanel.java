@@ -1,0 +1,30 @@
+import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
+
+public class InfoPanel extends JPanel {
+
+    private static final int TEXT_AREA_HEIGHT = 40;
+    private static final int CHARACTER_WIDTH = 39;
+    private static final int FONT_SIZE = 14;
+
+    JTextArea textArea = new JTextArea(TEXT_AREA_HEIGHT, CHARACTER_WIDTH);
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+
+    InfoPanel(){
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Calibri", Font.PLAIN, FONT_SIZE));
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
+        return;
+    }
+
+    public void displayString (String text) {
+        textArea.setText(textArea.getText()+"\n"+text);
+    }
+
+}
