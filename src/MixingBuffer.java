@@ -1,10 +1,9 @@
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Random;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class MixingBuffer {//placeholder class name for now
 
@@ -34,6 +33,7 @@ public class MixingBuffer {//placeholder class name for now
     public void synthesise() {//creates the synthesised crowd
 
         try{
+           // Files.deleteIfExists(Paths.get("crowd.wav"));//delete any old file - not working now maybe in future
 
             byte[] buffer = new byte[bufferLength];//arbitrarily large buffer
             byte emptyByte = 0;
@@ -43,6 +43,8 @@ public class MixingBuffer {//placeholder class name for now
             File dir = new File("resources/audio_samples/");
             for(File f: dir.listFiles())
                 files.add(f);
+
+            Collections.shuffle(files);
             //add all audio files in resources folder to list to draw crowd sounds from
 
             LinkedList<byte[]> byteArrays = new LinkedList<>();
@@ -87,7 +89,7 @@ public class MixingBuffer {//placeholder class name for now
     {
         Random rand = new Random();
 
-        int offset = rand.nextInt(1560000/9*10);
+        int offset = rand.nextInt(1560000);
         //return a number uniformly anywhere through (most of) the buffer
 
         return offset;
@@ -96,16 +98,11 @@ public class MixingBuffer {//placeholder class name for now
     public void play(String filename){//method to play our newly synthesised crowd audio file
 
         try{
-            Thread.sleep(2000);
             Clip clip = AudioSystem.getClip();
 
             clip.open(AudioSystem.getAudioInputStream(new File(filename)));
 
             clip.start();
-
-            Thread.sleep(clip.getMicrosecondLength()/1000);//need the program to keep running until the sound is played
-            //microseconds vs milliseconds so need to divide by 1000
-
         }
         catch (Exception e){
             e.printStackTrace();
