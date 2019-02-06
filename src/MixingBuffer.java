@@ -8,8 +8,9 @@ import java.util.*;
 public class MixingBuffer {//placeholder class name for now
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
-    private static final int bufferLength = 1560000;//value subject to change
+    private static final int bufferLength = 15600;//value subject to change
     private static final String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
+    private int numSeconds = 10;
 
     private byte[] toByteArray(File file){
         try{
@@ -49,12 +50,12 @@ public class MixingBuffer {//placeholder class name for now
 
     } //can use this to vary list of samples rather than everything in all together
 
-    public void synthesise(int numSamples) {//creates the synthesised crowd
+    public void synthesise(int numSamples, int numSeconds) {//creates the synthesised crowd
 
         try{
            // Files.deleteIfExists(Paths.get("crowd.wav"));//delete any old file - not working now maybe in future
 
-            byte[] buffer = new byte[bufferLength];//arbitrarily large buffer
+            byte[] buffer = new byte[bufferLength*numSeconds];//arbitrarily large buffer
             byte emptyByte = 0;
 
             Arrays.fill(buffer, emptyByte);
@@ -73,7 +74,7 @@ public class MixingBuffer {//placeholder class name for now
             {
                 byte[] curr = byteArrays.pop();//get a sample from list
 
-                for(int i=offset;i<curr.length && i<bufferLength ;i++)//iterate through that sample
+                for(int i=offset;i<curr.length && i<(bufferLength*numSeconds) ;i++)//iterate through that sample
                 {
                     buffer[i] += curr[i];
                 }//add a sample to buffer
@@ -86,7 +87,7 @@ public class MixingBuffer {//placeholder class name for now
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength*numSeconds);
             //need to find a proper value for length and ideally a more static version of the audio format
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
@@ -103,7 +104,7 @@ public class MixingBuffer {//placeholder class name for now
     {
         Random rand = new Random();
 
-        int offset = rand.nextInt(1560000);
+        int offset = rand.nextInt(bufferLength*numSeconds);
         //return a number uniformly anywhere through (most of) the buffer
 
         return offset;
@@ -117,6 +118,11 @@ public class MixingBuffer {//placeholder class name for now
             clip.open(AudioSystem.getAudioInputStream(new File(filename)));
 
             clip.start();
+
+            clip.drain();
+
+            if(!clip.isRunning())
+                System.out.println("DONE");
         }
         catch (Exception e){
             e.printStackTrace();
