@@ -28,9 +28,28 @@ public class MixingBuffer {//placeholder class name for now
         return null;//encountered a problem with converting the file to byte array
     }
 
-    //private void populate(){} - can use this to vary list of samples rather than everything in all together
+    private void populate(int numSamples)//add samples to list to create crowd sound from
+    {
+        files.clear();//clear out any old files
 
-    public void synthesise() {//creates the synthesised crowd
+        int count = 0;
+
+        File dir = new File("resources/audio_samples/");
+        File[] listFiles = dir.listFiles();
+
+        while (count < numSamples)
+        {
+            files.add(listFiles[count]);
+            count++;
+        }
+
+        Collections.shuffle(files);
+
+        System.out.println(files.toString());
+
+    } //can use this to vary list of samples rather than everything in all together
+
+    public void synthesise(int numSamples) {//creates the synthesised crowd
 
         try{
            // Files.deleteIfExists(Paths.get("crowd.wav"));//delete any old file - not working now maybe in future
@@ -40,14 +59,9 @@ public class MixingBuffer {//placeholder class name for now
 
             Arrays.fill(buffer, emptyByte);
 
-            File dir = new File("resources/audio_samples/");
-            for(File f: dir.listFiles())
-                files.add(f);
-
-            Collections.shuffle(files);
-            //add all audio files in resources folder to list to draw crowd sounds from
-
             LinkedList<byte[]> byteArrays = new LinkedList<>();
+
+            populate(numSamples);//add files to sample list
 
             for(File f: files)
                 byteArrays.add(toByteArray(f));//now have a list of the files in byte array form

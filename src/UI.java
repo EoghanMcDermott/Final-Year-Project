@@ -14,6 +14,8 @@ public class UI{
 
     public UI()
     {
+        Slider numSamplesSlider = new Slider();
+
         waveform = new ImageIcon("resources/images/waveform.JPG");
         //maybe can use praat to generate a proper waveform each time to display
 
@@ -31,9 +33,10 @@ public class UI{
 
         JButton generate = new JButton("Generate Crowd");
         generate.setSize(150,150);
+        generate.setVisible(true);
         generate.addActionListener(e -> {
             infoPanel.displayString("Generating crowd...\n");
-            mixer.synthesise();
+            mixer.synthesise(numSamplesSlider.getValue());
             infoPanel.displayString(mixer.getFiles());
             infoPanel.displayString("Crowd Generated");
         });
@@ -41,6 +44,7 @@ public class UI{
 
         JButton playButton = new JButton("Play");
         playButton.setSize(150,150);
+        playButton.setVisible(true);
         playButton.addActionListener(e -> {
             infoPanel.displayString("Now playing: " + mixer.getFilename());
             mixer.play("crowd.wav");
@@ -49,12 +53,16 @@ public class UI{
 
         JButton placeholder = new JButton("Parameterisation Stuff");
         placeholder.setSize(420,150);
+        placeholder.setVisible(true);
 
+
+        frame.add(numSamplesSlider, BorderLayout.SOUTH);
 
         frame.add(generate, BorderLayout.WEST);
         frame.add(playButton, BorderLayout.EAST);
         frame.add(infoPanel, BorderLayout.CENTER);
-        frame.add(placeholder, BorderLayout.SOUTH);
+
+       // frame.add(placeholder, BorderLayout.SOUTH);
         frame.add(new JLabel(waveform), BorderLayout.NORTH);
         //(poorly) arranging things in the overall ui panel
         return;
