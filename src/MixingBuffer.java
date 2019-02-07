@@ -50,9 +50,11 @@ public class MixingBuffer {//placeholder class name for now
 
     } //can use this to vary list of samples rather than everything in all together
 
-    public void synthesise(int numSamples, int numSeconds) {//creates the synthesised crowd
+    public void synthesise(int numSamples, int duration) {//creates the synthesised crowd
 
         try{
+
+            numSeconds = duration;
            // Files.deleteIfExists(Paths.get("crowd.wav"));//delete any old file - not working now maybe in future
 
             byte[] buffer = new byte[bufferLength*numSeconds];//arbitrarily large buffer
