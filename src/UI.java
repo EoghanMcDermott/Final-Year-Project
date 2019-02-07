@@ -56,8 +56,11 @@ public class UI{
         frame.add(playButton, BorderLayout.EAST);
         frame.add(infoPanel, BorderLayout.CENTER);
         frame.add(new JLabel(waveform), BorderLayout.NORTH);
-        frame.add(numSamplesSlider, BorderLayout.PAGE_END);
-        frame.add(duration, BorderLayout.PAGE_END);
+
+        JPanel parameterisation = new JPanel(new GridLayout(2, 1));
+        parameterisation.add(numSamplesSlider);
+        parameterisation.add(duration);
+        frame.add(parameterisation, BorderLayout.SOUTH);
 
         //(poorly) arranging things in the overall ui panel
         return;

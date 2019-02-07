@@ -10,11 +10,10 @@ public class Slider extends JPanel{
         int MIN = increment/10;
         int MAX = increment;
         int DEFAULT = increment/2;
+        //adjust values to fit as appropriate
 
         sliderBar = new JSlider(MIN,MAX,DEFAULT);
         setLayout(new BorderLayout());
-
-        setSize(420,150);
 
         JLabel sliderLabel = new JLabel(name, JLabel.CENTER);
 
@@ -23,12 +22,16 @@ public class Slider extends JPanel{
         sliderBar.setMinorTickSpacing(1);
         sliderBar.setMajorTickSpacing(5);
         sliderBar.setPaintTicks(true);
+        //dealing with border ticks
 
-        //sliderBar.createStandardLabels(5,10);
         sliderBar.setPaintLabels(true);
+        //adding numeric values instead of just ticks
+
+        setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
         add(sliderLabel, BorderLayout.NORTH);
         add(sliderBar, BorderLayout.SOUTH);
+        //display title of slider then actual slider underneath
     }
 
     public int getValue() {
