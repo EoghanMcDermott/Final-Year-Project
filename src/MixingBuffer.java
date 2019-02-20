@@ -10,7 +10,6 @@ public class MixingBuffer {
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
     private int bufferLength = 176400;//1 second of 16bit 44.1khz of pcm audio
     private static final String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
-    private static final int dataStart = 44;//NEED TO SKIP THE FIRST 44 BYTES IN A WAV FILE TO REACH THE ACTUAL DATA
 
     private byte[] toByteArray(File file){
         try{
@@ -19,16 +18,6 @@ public class MixingBuffer {
             byte[] byteArray = new byte[in.available()];//make sure the size is correct
 
             while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
-
-            //need to remove extra info and just store sound data
-            byte[] temp = new byte[byteArray.length - dataStart];
-
-            for(int i= dataStart;i<byteArray.length;i++)
-                temp[i-dataStart] = byteArray[i];
-
-            byteArray = temp.clone();
-
-           // System.out.println("File: " + file.toString() + "   Length: " + byteArray.length + " bytes " + byteArray.length/176400 + "seconds ");
 
             return byteArray;//return the new byte array
         }
