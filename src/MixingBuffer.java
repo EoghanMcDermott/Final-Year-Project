@@ -72,9 +72,6 @@ public class MixingBuffer {
 
            setBufferLength(duration);//want buffer of appropriate length
 
-           if(Files.deleteIfExists(Paths.get("crowd.wav")))
-               System.out.println("OLD FILE DELETED");//delete any old file
-
             byte[] buffer = new byte[bufferLength];//arbitrarily large buffer
             byte emptyByte = 0;
 
@@ -106,7 +103,7 @@ public class MixingBuffer {
                 //next sample placed in a random location in the buffer
             }
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/format.getFormat().getFrameSize());
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/4);
             //need to find a proper value for length and ideally a more static version of the audio format
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
@@ -120,7 +117,7 @@ public class MixingBuffer {
     {
         Random rand = new Random();
 
-        return rand.nextInt(bufferLength) *95/100;
+        return rand.nextInt(bufferLength);// *95/100;
         //return a number uniformly anywhere through (most of) the buffer
     }
 
