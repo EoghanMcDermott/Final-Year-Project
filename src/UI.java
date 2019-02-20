@@ -46,7 +46,7 @@ public class UI{
         playButton.setSize(150,150);
         playButton.addActionListener(e -> {
             infoPanel.displayString("Now playing: " + mixer.getFilename());
-            mixer.play("crowd.wav");
+            mixer.play();
         });
         //play button for our new crowd sound
 
