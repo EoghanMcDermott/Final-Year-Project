@@ -5,12 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class MixingBuffer {//placeholder class name for now
+public class MixingBuffer {
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
-    private static final int bufferLength = 15600;//value subject to change
+    private int bufferLength = 176400;//1 second of 16bit 44.1khz of pcm audio
     private static final String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
-    private int numSeconds = 10;
+    private static final int dataStart = 44;//NEED TO SKIP THE FIRST 44 BYTES IN A WAV FILE TO REACH THE ACTUAL DATA
 
     private byte[] toByteArray(File file){
         try{
@@ -18,7 +18,17 @@ public class MixingBuffer {//placeholder class name for now
 
             byte[] byteArray = new byte[in.available()];//make sure the size is correct
 
-            while(in.read(byteArray) != -1);//read in byte by byte until end of buffer reached
+            while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
+
+            //need to remove extra info and just store sound data
+            byte[] temp = new byte[byteArray.length - dataStart];
+
+            for(int i= dataStart;i<byteArray.length;i++)
+                temp[i-dataStart] = byteArray[i];
+
+            byteArray = temp.clone();
+
+           // System.out.println("File: " + file.toString() + "   Length: " + byteArray.length + " bytes " + byteArray.length/176400 + "seconds ");
 
             return byteArray;//return the new byte array
         }
@@ -33,6 +43,8 @@ public class MixingBuffer {//placeholder class name for now
     {
         files.clear();//clear out any old files
 
+        Random rand = new Random();
+
         int count = 0;
 
         File dir = new File("resources/audio_samples/");
@@ -40,24 +52,30 @@ public class MixingBuffer {//placeholder class name for now
 
         while (count < numSamples)
         {
-            files.add(listFiles[count]);
+            int index = rand.nextInt(listFiles.length);
+            files.add(listFiles[index]);
             count++;
         }
 
         Collections.shuffle(files);
 
-        System.out.println(files.toString());
-
     } //can use this to vary list of samples rather than everything in all together
+
+    private void setBufferLength(int seconds)
+    {
+        bufferLength = bufferLength * seconds;
+    }
 
     public void synthesise(int numSamples, int duration) {//creates the synthesised crowd
 
         try{
 
-            numSeconds = duration;
-           // Files.deleteIfExists(Paths.get("crowd.wav"));//delete any old file - not working now maybe in future
+           setBufferLength(duration);//want buffer of appropriate length
 
-            byte[] buffer = new byte[bufferLength*numSeconds];//arbitrarily large buffer
+           if(Files.deleteIfExists(Paths.get("crowd.wav")))
+               System.out.println("OLD FILE DELETED");//delete any old file
+
+            byte[] buffer = new byte[bufferLength];//arbitrarily large buffer
             byte emptyByte = 0;
 
             Arrays.fill(buffer, emptyByte);
@@ -72,11 +90,15 @@ public class MixingBuffer {//placeholder class name for now
 
             int offset = 0;//no offset for the very first file
 
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
+            //need to create an audio file format object for this to work properly
+
             while(!byteArrays.isEmpty())//until every sample has been added - no repetition of samples - change populate method
             {
                 byte[] curr = byteArrays.pop();//get a sample from list
+                System.out.println(byteArrays.size());
 
-                for(int i=offset;i<curr.length && i<(bufferLength*numSeconds) ;i++)//iterate through that sample
+                for(int i=offset;i<curr.length && i<bufferLength ;i++)//iterate through that sample
                 {
                     buffer[i] += curr[i];
                 }//add a sample to buffer
@@ -85,31 +107,22 @@ public class MixingBuffer {//placeholder class name for now
                 //next sample placed in a random location in the buffer
             }
 
-
-            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
-            //need to create an audio file format object for this to work properly
-
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength*numSeconds);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/format.getFormat().getFrameSize());
             //need to find a proper value for length and ideally a more static version of the audio format
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
-
         }
         catch (Exception e){
             e.printStackTrace();
         }
-
-        return;
     }
 
     private int randomiseOffset()//want to randomly offset different samples
     {
         Random rand = new Random();
 
-        int offset = rand.nextInt(bufferLength*numSeconds);
+        return rand.nextInt(bufferLength) *95/100;
         //return a number uniformly anywhere through (most of) the buffer
-
-        return offset;
     }
 
     public void play(String filename){//method to play our newly synthesised crowd audio file
