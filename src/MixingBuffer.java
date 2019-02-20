@@ -96,7 +96,6 @@ public class MixingBuffer {
             while(!byteArrays.isEmpty())//until every sample has been added - no repetition of samples - change populate method
             {
                 byte[] curr = byteArrays.pop();//get a sample from list
-                System.out.println(byteArrays.size());
 
                 for(int i=offset;i<curr.length && i<bufferLength ;i++)//iterate through that sample
                 {
