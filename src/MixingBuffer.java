@@ -22,7 +22,20 @@ public class MixingBuffer {
 
             while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
 
+            Clip clip = AudioSystem.getClip();
+
+            clip.open(AudioSystem.getAudioInputStream(file));
+
+            clip.start();
+
+            clip.drain();
+
+            if(!clip.isRunning())
+                System.out.println("DONE");
+
+
             return byteArray;//return the new byte array
+
         }
         catch (Exception e){
             e.printStackTrace();
@@ -45,13 +58,21 @@ public class MixingBuffer {
 
         int count = 0;
 
-        File dir = new File("resources/audio_samples/");
-        File[] listFiles = dir.listFiles();
+        File dirMale = new File("resources/audio_samples/male/");
+        File dirFemale = new File("resources/audio_samples/female/");
+
+        ArrayList<File> listFiles = new ArrayList<>();
+
+        for(File f: dirFemale.listFiles())
+            listFiles.add(f);
+
+        for(File f: dirMale.listFiles())
+            listFiles.add(f);
 
         while (count < numSamples)
         {
-            int index = rand.nextInt(listFiles.length);
-            files.add(listFiles[index]);
+            int index = rand.nextInt(listFiles.size());
+            files.add(listFiles.get(index));
             count++;
         }
 
@@ -90,18 +111,20 @@ public class MixingBuffer {
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
-            while(!byteArrays.isEmpty())//until every sample has been added - no repetition of samples - change populate method
+            while(!byteArrays.isEmpty())//until every sample has been added
             {
                 byte[] curr = byteArrays.pop();//get a sample from list
 
-                for(int i=offset;i<curr.length && i<bufferLength ;i++)//iterate through that sample
+                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
                 {
-                    buffer[i] += curr[i];
+                    buffer[i+offset] += curr[i];
                 }//add a sample to buffer
 
                 offset = randomiseOffset();
                 //next sample placed in a random location in the buffer
             }
+
+           // buffer = normalise(buffer);
 
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/4);
             //need to find a proper value for length and ideally a more static version of the audio format
@@ -116,6 +139,46 @@ public class MixingBuffer {
         catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    private byte[] normalise(byte[] input)
+    {
+        byte[] output = new byte[input.length];
+
+        byte[] minMax= minMax(input);
+
+        byte targetMax = (byte) 8000;//magic value
+
+        int i=0;
+        for(byte b: input)
+        {
+            byte maxReduce =(byte) (1 - targetMax/minMax[1]);//max value
+            int abs = Math.abs(b);
+            double factor = (maxReduce)*abs/minMax[1];
+            output[i] =(byte) Math.round((1-factor)*b);
+            i++;
+        }
+
+        return output;
+    }
+
+    private byte[] minMax(byte[] input)
+    {
+        byte[] output= new byte[2];
+
+        byte min = Byte.MIN_VALUE;
+        byte max = Byte.MAX_VALUE;
+
+        for(byte b: input)
+        {
+            min = (byte) Math.min(min, b);
+            max = (byte) Math.max(max, b);
+        }
+
+        output[0] = min;
+        output[1] = max;
+
+        return output;
     }
 
     private int randomiseOffset()//want to randomly offset different samples
