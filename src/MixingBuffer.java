@@ -1,6 +1,7 @@
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,18 +23,18 @@ public class MixingBuffer {
 
             while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
 
-            Clip clip = AudioSystem.getClip();
-
-            clip.open(AudioSystem.getAudioInputStream(file));
-
-            clip.start();
-
-            clip.drain();
-
-            if(!clip.isRunning())
-                System.out.println("DONE");
-
-
+//            Clip clip = AudioSystem.getClip();
+//
+//            clip.open(AudioSystem.getAudioInputStream(file));
+//
+//            clip.start();
+//
+//            clip.drain();
+//
+//            if(!clip.isRunning())
+//                System.out.println("DONE");
+//
+//
             return byteArray;//return the new byte array
 
         }
@@ -93,17 +94,14 @@ public class MixingBuffer {
 
             updateFilename();
 
-            byte[] buffer = new byte[bufferLength];//arbitrarily large buffer
-            byte emptyByte = 0;
+            ByteBuffer buffer = ByteBuffer.allocate(bufferLength);
 
-            Arrays.fill(buffer, emptyByte);
-
-            LinkedList<byte[]> byteArrays = new LinkedList<>();
+            LinkedList<byte[]> convertedFiles = new LinkedList<>();
 
             populate(numSamples);//add files to sample list
 
             for(File f: files)
-                byteArrays.add(toByteArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
 
 
             int offset = 0;//no offset for the very first file
@@ -111,74 +109,32 @@ public class MixingBuffer {
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
-            while(!byteArrays.isEmpty())//until every sample has been added
+            while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                byte[] curr = byteArrays.pop();//get a sample from list
+                byte[] curr = convertedFiles.pop();//get a sample from list
 
-                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
+                int pos = 0;
+                for(int i=offset;i<curr.length+offset && i<bufferLength ;i++)//iterate through that sample
                 {
-                    buffer[i+offset] += curr[i];
+                    buffer.put(i, curr[pos]);
+                    pos++;
                 }//add a sample to buffer
 
                 offset = randomiseOffset();
                 //next sample placed in a random location in the buffer
             }
 
-           // buffer = normalise(buffer);
+            ByteArrayInputStream bufferStream = new ByteArrayInputStream(buffer.array());
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/4);
-            //need to find a proper value for length and ideally a more static version of the audio format
-            out.mark(bufferLength);
+            AudioInputStream out = new AudioInputStream(bufferStream,format.getFormat(),bufferLength/4);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 
-            out.reset();
-
-            crowdIterations++;
+            crowdIterations++;//don't want weird overlapping files
         }
         catch (Exception e){
             e.printStackTrace();
         }
-    }
-
-    private byte[] normalise(byte[] input)
-    {
-        byte[] output = new byte[input.length];
-
-        byte[] minMax= minMax(input);
-
-        byte targetMax = (byte) 8000;//magic value
-
-        int i=0;
-        for(byte b: input)
-        {
-            byte maxReduce =(byte) (1 - targetMax/minMax[1]);//max value
-            int abs = Math.abs(b);
-            double factor = (maxReduce)*abs/minMax[1];
-            output[i] =(byte) Math.round((1-factor)*b);
-            i++;
-        }
-
-        return output;
-    }
-
-    private byte[] minMax(byte[] input)
-    {
-        byte[] output= new byte[2];
-
-        byte min = Byte.MIN_VALUE;
-        byte max = Byte.MAX_VALUE;
-
-        for(byte b: input)
-        {
-            min = (byte) Math.min(min, b);
-            max = (byte) Math.max(max, b);
-        }
-
-        output[0] = min;
-        output[1] = max;
-
-        return output;
     }
 
     private int randomiseOffset()//want to randomly offset different samples
