@@ -10,31 +10,27 @@ import java.util.*;
 public class MixingBuffer {
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
-    private static final int oneSecond = 176400;//1 second of 16bit 44.1khz of pcm audio
+    private static final int oneSecond = 176400/2;//1 second of 16bit 44.1khz of pcm audio
     private int bufferLength;
+    private int numSeconds;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
     private int crowdIterations = 0;
+    private ArrayList<Clip> clips = new ArrayList<>();
 
     private byte[] toByteArray(File file){
         try{
             AudioInputStream in = AudioSystem.getAudioInputStream(file);
 
-            byte[] byteArray = new byte[in.available()];//make sure the size is correct
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(file);
+            //need to create an audio file format object for this to work properly
+
+            byte[] byteArray = new byte[(int)file.length()];//make sure the size is correct
 
             while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
 
-//            Clip clip = AudioSystem.getClip();
-//
-//            clip.open(AudioSystem.getAudioInputStream(file));
-//
-//            clip.start();
-//
-//            clip.drain();
-//
-//            if(!clip.isRunning())
-//                System.out.println("DONE");
-//
-//
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(byteArray), format.getFormat(),(int) file.length());
+            AudioSystem.write(out, AudioFileFormat.Type.WAVE,new File("test.wav"));
+
             return byteArray;//return the new byte array
 
         }
@@ -43,6 +39,24 @@ public class MixingBuffer {
         }
 
         return null;//encountered a problem with converting the file to byte array
+    }
+
+    private void toClip(File file)
+    {
+        try
+        {
+            AudioInputStream in = AudioSystem.getAudioInputStream(file);
+
+            Clip clip = AudioSystem.getClip();
+
+            clip.open(AudioSystem.getAudioInputStream(file));
+
+            clips.add(clip);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void updateFilename()
@@ -59,13 +73,13 @@ public class MixingBuffer {
 
         int count = 0;
 
-        File dirMale = new File("resources/audio_samples/male/");
-        File dirFemale = new File("resources/audio_samples/female/");
+        File dirMale = new File("resources/audio_samples/mono/");
+        //File dirFemale = new File("resources/audio_samples/female/");
 
         ArrayList<File> listFiles = new ArrayList<>();
 
-        for(File f: dirFemale.listFiles())
-            listFiles.add(f);
+//        for(File f: dirFemale.listFiles())
+//            listFiles.add(f);
 
         for(File f: dirMale.listFiles())
             listFiles.add(f);
@@ -83,6 +97,7 @@ public class MixingBuffer {
 
     private void setBufferLength(int seconds)
     {
+        numSeconds = seconds;
         bufferLength = oneSecond * seconds;
     }
 
@@ -94,14 +109,27 @@ public class MixingBuffer {
 
             updateFilename();
 
-            ByteBuffer buffer = ByteBuffer.allocate(bufferLength);
+            int[] buffer = new int[bufferLength];
 
-            LinkedList<byte[]> convertedFiles = new LinkedList<>();
+            Arrays.fill(buffer, 0);//fill buffer with 0's
+
+            LinkedList<int[]> convertedFiles = new LinkedList<>();
 
             populate(numSamples);//add files to sample list
 
+            Converter c = new Converter();
+
             for(File f: files)
-                convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(c.convertToInt(f));
+                //convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
+//
+//            for(Clip c : clips)
+//            {
+//                c.open();
+//                c.start();
+//
+//                Thread.sleep(randomiseOffset()*1000);
+//            }
 
 
             int offset = 0;//no offset for the very first file
@@ -109,24 +137,25 @@ public class MixingBuffer {
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
+            System.out.println(format.toString());
+
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                byte[] curr = convertedFiles.pop();//get a sample from list
+                int[] curr = convertedFiles.pop();//get a sample from list
 
-                int pos = 0;
-                for(int i=offset;i<curr.length+offset && i<bufferLength ;i++)//iterate through that sample
+                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
                 {
-                    buffer.put(i, curr[pos]);
-                    pos++;
+                    buffer[i+offset] = ((buffer[i+offset] + curr[i])/2);
+
                 }//add a sample to buffer
 
                 offset = randomiseOffset();
                 //next sample placed in a random location in the buffer
             }
 
-            ByteArrayInputStream bufferStream = new ByteArrayInputStream(buffer.array());
 
-            AudioInputStream out = new AudioInputStream(bufferStream,format.getFormat(),bufferLength/4);
+
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 
@@ -178,4 +207,31 @@ public class MixingBuffer {
 
         return str;
     }
+
+
+//    public void mixClips()
+//    {
+//        try
+//        {
+//            setBufferLength(20);
+//
+//            ArrayList<Clip> c = clips;
+//
+//            System
+//
+//            while(!c.isEmpty()) {
+//                Clip curr = c.get(0);
+//
+//                curr.start();
+//
+//                //Thread.sleep(randomiseOffset());
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//
+//    }
 }
