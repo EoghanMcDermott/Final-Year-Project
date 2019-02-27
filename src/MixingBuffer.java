@@ -146,13 +146,11 @@ public class MixingBuffer {
 //                    buffer[i+offset] = ((buffer[i+offset] + curr[i])/2);
 //
 //                }//add a sample to buffer
-//
-//                offset = randomiseOffset();
-//                //next sample placed in a random location in the buffer
-                for(int i=0;i<curr.length && i<bufferLength;i++)
+
+                for(int i=0;i<curr.length && (i+offset)<bufferLength;i++)
                     buffer[i] += curr[i];
 
-                System.out.println("ADDED");
+               offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
