@@ -153,9 +153,9 @@ public class MixingBuffer {
                 //next sample placed in a random location in the buffer
             }
 
+            byte[] temp = c.convertToByte(buffer);
 
-
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(temp),format.getFormat(),bufferLength/2);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 

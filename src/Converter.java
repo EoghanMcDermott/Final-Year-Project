@@ -1,6 +1,7 @@
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
+import java.nio.ByteBuffer;
 
 public class Converter {
 
@@ -37,11 +38,18 @@ public class Converter {
     {
         try
         {
-            //convert back to byte[]
+            ByteBuffer byteBuffer = ByteBuffer.allocate(input.length * 2);//2 bytes per short
+
+            for(int i=0;i<input.length;i++)
+                byteBuffer.putShort((short)input[i]);
+
+            return byteBuffer.array();
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
+
+        return null;//error converting
     }
 }
