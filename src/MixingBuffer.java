@@ -133,15 +133,11 @@ public class MixingBuffer {
             {
                 byte[] curr = convertedFiles.pop();//get a sample from list
 
-//                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
-//                {
-//                    buffer[i+offset] = ((buffer[i+offset] + curr[i])/2);
-//
-//                }//add a sample to buffer
-
-                for(int i=0;i<curr.length && (i+offset)<bufferLength;i++)
+                for(int i=0;i<curr.length-2 && (i+offset)<bufferLength-2;i+=2)//iterate through a sample
+                {
                     buffer[i] += curr[i];
-
+                    buffer[i+1] += curr[i+1];
+                }
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
