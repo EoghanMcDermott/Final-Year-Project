@@ -137,7 +137,7 @@ public class MixingBuffer {
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
-            System.out.println(format.toString());
+            //System.out.println(format.toString());
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
