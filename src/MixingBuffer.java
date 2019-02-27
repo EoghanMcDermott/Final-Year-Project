@@ -21,15 +21,14 @@ public class MixingBuffer {
         try{
             AudioInputStream in = AudioSystem.getAudioInputStream(file);
 
-            AudioFileFormat format = AudioSystem.getAudioFileFormat(file);
-            //need to create an audio file format object for this to work properly
-
             byte[] byteArray = new byte[(int)file.length()];//make sure the size is correct
 
             while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(byteArray), format.getFormat(),(int) file.length());
-            AudioSystem.write(out, AudioFileFormat.Type.WAVE,new File("test.wav"));
+//            AudioFileFormat format = AudioSystem.getAudioFileFormat(file);
+//            //need to create an audio file format object for this to work properly
+//            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(byteArray), format.getFormat(),(int) file.length());
+//            AudioSystem.write(out, AudioFileFormat.Type.WAVE,new File("test.wav"));
 
             return byteArray;//return the new byte array
 
@@ -60,10 +59,7 @@ public class MixingBuffer {
     }
 
     private void updateFilename()
-    {
-        filename = "crowd" + Integer.toString(crowdIterations)+".wav";
-
-    }
+    { filename = "crowd" + Integer.toString(crowdIterations)+".wav"; }
 
     private void populate(int numSamples)//add samples to list to create crowd sound from
     {
@@ -71,33 +67,34 @@ public class MixingBuffer {
 
         Random rand = new Random();
 
-        int count = 0;
-
         File dirMale = new File("resources/audio_samples/mono/");
-        //File dirFemale = new File("resources/audio_samples/female/");
+        File dirFemale = new File("resources/audio_samples/female/");
 
         ArrayList<File> listFiles = new ArrayList<>();
 
-//        for(File f: dirFemale.listFiles())
-//            listFiles.add(f);
+        for(File f: dirFemale.listFiles())
+            listFiles.add(f);
 
         for(File f: dirMale.listFiles())
             listFiles.add(f);
+        //listfiles now contains all files from both male and female directories
+
+        int count = 0;
 
         while (count < numSamples)
         {
             int index = rand.nextInt(listFiles.size());
             files.add(listFiles.get(index));
             count++;
-        }
+        }//randomly add samples to list
 
-        Collections.shuffle(files);
+        Collections.shuffle(files);//shuffling said list to improve variability
 
     } //can use this to vary list of samples rather than everything in all together
 
     private void setBufferLength(int seconds)
     {
-        numSeconds = seconds;
+        numSeconds = seconds;//might be handy to globally keep track of this - if using clip method
         bufferLength = oneSecond * seconds;
     }
 
@@ -109,14 +106,14 @@ public class MixingBuffer {
 
             updateFilename();
 
-            byte[] buffer = new byte[bufferLength];
+            byte[] buffer = new byte[bufferLength];//buffer of appropriate length - 8 bit issue?
 
             byte emptyByte = 0;
             Arrays.fill(buffer, emptyByte);//fill buffer with 0's
 
-            LinkedList<byte[]> convertedFiles = new LinkedList<>();
-
             populate(numSamples);//add files to sample list
+
+            LinkedList<byte[]> convertedFiles = new LinkedList<>();
 
             for(File f: files)
                 convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
@@ -131,11 +128,6 @@ public class MixingBuffer {
 
 
             int offset = 0;//no offset for the very first file
-
-            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
-            //need to create an audio file format object for this to work properly
-
-            //System.out.println(format.toString());
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
@@ -153,6 +145,9 @@ public class MixingBuffer {
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
+            //need to create an audio file format object for this to work properly
+
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
@@ -168,7 +163,7 @@ public class MixingBuffer {
     {
         Random rand = new Random();
 
-        return rand.nextInt(bufferLength);// *95/100;
+        return rand.nextInt(bufferLength)*95/100;
         //return a number uniformly anywhere through (most of) the buffer
     }
 
@@ -182,9 +177,6 @@ public class MixingBuffer {
             clip.start();
 
             clip.drain();
-
-            if(!clip.isRunning())
-                System.out.println("DONE");
         }
         catch (Exception e){
             e.printStackTrace();
@@ -192,9 +184,7 @@ public class MixingBuffer {
     }
 
     public String getFilename()//return name of generated crowd file to display in ui
-    {
-        return filename;
-    }
+    {return filename;}
 
     public String getFiles()//list files to display in ui
     {
