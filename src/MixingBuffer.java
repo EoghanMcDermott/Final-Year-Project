@@ -10,7 +10,7 @@ import java.util.*;
 public class MixingBuffer {
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
-    private static final int oneSecond = 176400/2;//1 second of 16bit 44.1khz of pcm audio
+    private static final int oneSecond = 176400;//1 second of 16bit 44.1khz of pcm audio
     private int bufferLength;
     private int numSeconds;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
@@ -109,19 +109,17 @@ public class MixingBuffer {
 
             updateFilename();
 
-            int[] buffer = new int[bufferLength];
+            byte[] buffer = new byte[bufferLength];
 
-            Arrays.fill(buffer, 0);//fill buffer with 0's
+            byte emptyByte = 0;
+            Arrays.fill(buffer, emptyByte);//fill buffer with 0's
 
-            LinkedList<int[]> convertedFiles = new LinkedList<>();
+            LinkedList<byte[]> convertedFiles = new LinkedList<>();
 
             populate(numSamples);//add files to sample list
 
-            Converter c = new Converter();
-
             for(File f: files)
-                convertedFiles.add(c.convertToInt(f));
-                //convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
 //
 //            for(Clip c : clips)
 //            {
@@ -141,21 +139,23 @@ public class MixingBuffer {
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                int[] curr = convertedFiles.pop();//get a sample from list
+                byte[] curr = convertedFiles.pop();//get a sample from list
 
-                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
-                {
-                    buffer[i+offset] = ((buffer[i+offset] + curr[i])/2);
+//                for(int i=0;i<curr.length && (i+offset)<bufferLength ;i++)//iterate through that sample
+//                {
+//                    buffer[i+offset] = ((buffer[i+offset] + curr[i])/2);
+//
+//                }//add a sample to buffer
+//
+//                offset = randomiseOffset();
+//                //next sample placed in a random location in the buffer
+                for(int i=0;i<curr.length && i<bufferLength;i++)
+                    buffer[i] += curr[i];
 
-                }//add a sample to buffer
-
-                offset = randomiseOffset();
-                //next sample placed in a random location in the buffer
+                System.out.println("ADDED");
             }
 
-            byte[] temp = c.convertToByte(buffer);
-
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(temp),format.getFormat(),bufferLength/2);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 
