@@ -17,13 +17,13 @@ public class MixingBuffer {
     private int crowdIterations = 0;
     private ArrayList<Clip> clips = new ArrayList<>();
 
-    private byte[] toByteArray(File file){
-        try{
+    private byte[] toByteArray(File file) {
+        try {
             AudioInputStream in = AudioSystem.getAudioInputStream(file);
 
-            byte[] byteArray = new byte[(int)file.length()];//make sure the size is correct
+            byte[] byteArray = new byte[(int) file.length()];//make sure the size is correct
 
-            while (in.read(byteArray) != -1);//read in byte by byte until end of audio input stream reached
+            while (in.read(byteArray) != -1) ;//read in byte by byte until end of audio input stream reached
 
 //            AudioFileFormat format = AudioSystem.getAudioFileFormat(file);
 //            //need to create an audio file format object for this to work properly
@@ -32,14 +32,42 @@ public class MixingBuffer {
 
             return byteArray;//return the new byte array
 
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;//encountered a problem with converting the file to byte array
     }
 
+    private byte[] fromInt(int[] input)
+    {
+        try
+        {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(input.length*4);//4 bytes per int
+
+            byte[] singleInt = new byte[4];
+
+            for(int i: input)
+            {
+                singleInt[0] = (byte) (i >> 24);
+                singleInt[1] = (byte) (i >> 16);
+                singleInt[2] = (byte) (i >> 8);
+                singleInt[3] = (byte) (i);
+
+                byteBuffer.put(singleInt,0,singleInt.length);
+            }
+
+            return byteBuffer.array();
+        }
+
+        catch(Exception e)
+
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
     private void toClip(File file)
     {
         try
@@ -67,7 +95,7 @@ public class MixingBuffer {
 
         Random rand = new Random();
 
-        File dirMale = new File("resources/audio_samples/mono/");
+        File dirMale = new File("resources/audio_samples/male/");
         File dirFemale = new File("resources/audio_samples/female/");
 
         ArrayList<File> listFiles = new ArrayList<>();
@@ -133,16 +161,21 @@ public class MixingBuffer {
             {
                 byte[] curr = convertedFiles.pop();//get a sample from list
 
+                int pos = 0;
                 for(int i=0;i<curr.length-2 && (i+offset)<bufferLength-2;i+=2)//iterate through a sample
                 {
-                    buffer[i] += curr[i];
-                    buffer[i+1] += curr[i+1];
+                    buffer[pos] += curr[i];
+                    pos++;
+                    buffer[pos] += curr[i+1];
+                    pos++;
                 }
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
+
+           //byte[] temp = fromInt(buffer);
 
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
 

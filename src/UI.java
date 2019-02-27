@@ -1,8 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 
-//VERY RUDIMENTARY FOR NOW
-
 public class UI{
 
     private JFrame frame = new JFrame();
