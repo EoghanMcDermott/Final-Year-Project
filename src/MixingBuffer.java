@@ -17,77 +17,10 @@ public class MixingBuffer {
     private int crowdIterations = 0;
     private ArrayList<Clip> clips = new ArrayList<>();
 
-    private byte[] toByteArray(File file) {
-        try {
-            AudioInputStream in = AudioSystem.getAudioInputStream(file);
-
-            byte[] byteArray = new byte[(int) file.length()];//make sure the size is correct
-
-            while (in.read(byteArray) != -1) ;//read in byte by byte until end of audio input stream reached
-
-//            AudioFileFormat format = AudioSystem.getAudioFileFormat(file);
-//            //need to create an audio file format object for this to work properly
-//            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(byteArray), format.getFormat(),(int) file.length());
-//            AudioSystem.write(out, AudioFileFormat.Type.WAVE,new File("test.wav"));
-
-            return byteArray;//return the new byte array
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;//encountered a problem with converting the file to byte array
-    }
-
-    private byte[] fromInt(int[] input)
-    {
-        try
-        {
-            ByteBuffer byteBuffer = ByteBuffer.allocate(input.length*4);//4 bytes per int
-
-            byte[] singleInt = new byte[4];
-
-            for(int i: input)
-            {
-                singleInt[0] = (byte) (i >> 24);
-                singleInt[1] = (byte) (i >> 16);
-                singleInt[2] = (byte) (i >> 8);
-                singleInt[3] = (byte) (i);
-
-                byteBuffer.put(singleInt,0,singleInt.length);
-            }
-
-            return byteBuffer.array();
-        }
-
-        catch(Exception e)
-
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-    private void toClip(File file)
-    {
-        try
-        {
-            AudioInputStream in = AudioSystem.getAudioInputStream(file);
-
-            Clip clip = AudioSystem.getClip();
-
-            clip.open(AudioSystem.getAudioInputStream(file));
-
-            clips.add(clip);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
 
     private void updateFilename()
     { filename = "crowd" + Integer.toString(crowdIterations)+".wav"; }
+
 
     private void populate(int numSamples)//add samples to list to create crowd sound from
     {
@@ -120,11 +53,13 @@ public class MixingBuffer {
 
     } //can use this to vary list of samples rather than everything in all together
 
+
     private void setBufferLength(int seconds)
     {
         numSeconds = seconds;//might be handy to globally keep track of this - if using clip method
         bufferLength = oneSecond * seconds;
     }
+
 
     public void synthesise(int numSamples, int duration) {//creates the synthesised crowd
 
@@ -141,34 +76,26 @@ public class MixingBuffer {
 
             populate(numSamples);//add files to sample list
 
-            LinkedList<byte[]> convertedFiles = new LinkedList<>();
+            LinkedList<int[]> convertedFiles = new LinkedList<>();
+
+            WAVConverter converter = new WAVConverter();
 
             for(File f: files)
-                convertedFiles.add(toByteArray(f));//now have a list of the files in byte array form
-//
-//            for(Clip c : clips)
-//            {
-//                c.open();
-//                c.start();
-//
-//                Thread.sleep(randomiseOffset()*1000);
-//            }
+                convertedFiles.add(converter.toIntArray(f));//now have a list of the files in byte array form
 
 
             int offset = 0;//no offset for the very first file
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                byte[] curr = convertedFiles.pop();//get a sample from list
+                int[] curr = convertedFiles.pop();//get a sample from list
 
-                int pos = 0;
-                for(int i=0;i<curr.length-2 && (i+offset)<bufferLength-2;i+=2)//iterate through a sample
-                {
-                    buffer[pos] += curr[i];
-                    pos++;
-                    buffer[pos] += curr[i+1];
-                    pos++;
-                }
+               // if(curr.length+offset < bufferLength)
+               // {
+                    for (int i = 0; i < curr.length; i++)
+                        buffer[i] += curr[i];
+               // }
+
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
@@ -188,6 +115,7 @@ public class MixingBuffer {
         }
     }
 
+
     private int randomiseOffset()//want to randomly offset different samples
     {
         Random rand = new Random();
@@ -195,6 +123,7 @@ public class MixingBuffer {
         return rand.nextInt(bufferLength)*95/100;
         //return a number uniformly anywhere through (most of) the buffer
     }
+
 
     public void play(){//method to play our newly synthesised crowd audio file
 
@@ -212,8 +141,10 @@ public class MixingBuffer {
         }
     }
 
+
     public String getFilename()//return name of generated crowd file to display in ui
     {return filename;}
+
 
     public String getFiles()//list files to display in ui
     {
@@ -224,31 +155,4 @@ public class MixingBuffer {
 
         return str;
     }
-
-
-//    public void mixClips()
-//    {
-//        try
-//        {
-//            setBufferLength(20);
-//
-//            ArrayList<Clip> c = clips;
-//
-//            System
-//
-//            while(!c.isEmpty()) {
-//                Clip curr = c.get(0);
-//
-//                curr.start();
-//
-//                //Thread.sleep(randomiseOffset());
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
 }
