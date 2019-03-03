@@ -15,7 +15,6 @@ public class MixingBuffer {
     private int numSeconds;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
     private int crowdIterations = 0;
-    private ArrayList<Clip> clips = new ArrayList<>();
 
 
     private void updateFilename()
@@ -69,42 +68,45 @@ public class MixingBuffer {
 
             updateFilename();
 
-            byte[] buffer = new byte[bufferLength];//buffer of appropriate length - 8 bit issue?
+            int[] buffer = new int[bufferLength];//buffer of appropriate length - 8 bit issue?
 
             byte emptyByte = 0;
             Arrays.fill(buffer, emptyByte);//fill buffer with 0's
 
             populate(numSamples);//add files to sample list
 
-            LinkedList<int[]> convertedFiles = new LinkedList<>();
+            LinkedList<byte[]> convertedFiles = new LinkedList<>();
 
-            WAVConverter converter = new WAVConverter();
+            Converter converter = new Converter();
 
             for(File f: files)
-                convertedFiles.add(converter.toIntArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(converter.toByteArray(f));//now have a list of the files in byte array form
 
 
             int offset = 0;//no offset for the very first file
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                int[] curr = convertedFiles.pop();//get a sample from list
+                byte[] curr = convertedFiles.pop();//get a sample from list
 
-               // if(curr.length+offset < bufferLength)
-               // {
-                    for (int i = 0; i < curr.length; i++)
+
+                    for (int i =0; i < curr.length; i++)
+                    {
                         buffer[i] += curr[i];
-               // }
+                    }
 
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
+
+            byte[] bufferInBytes = converter.intToBytes(buffer);
+
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
 
            //byte[] temp = fromInt(buffer);
 
-            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(buffer),format.getFormat(),bufferLength/2);
+            AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(bufferInBytes),format.getFormat(),bufferLength);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 
@@ -120,7 +122,7 @@ public class MixingBuffer {
     {
         Random rand = new Random();
 
-        return rand.nextInt(bufferLength)*95/100;
+        return rand.nextInt(bufferLength)*95/100 % 4;
         //return a number uniformly anywhere through (most of) the buffer
     }
 
