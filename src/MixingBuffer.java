@@ -10,7 +10,7 @@ import java.util.*;
 public class MixingBuffer {
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
-    private static final int oneSecond = 176400;//1 second of 16bit 44.1khz of pcm audio
+    private static final int oneSecond = 176400/2;//1 second of 16bit 44.1khz of pcm audio
     private int bufferLength;
     private int numSeconds;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
@@ -18,7 +18,7 @@ public class MixingBuffer {
 
 
     private void updateFilename()
-    { filename = "crowd" + Integer.toString(crowdIterations)+".wav"; }
+    { filename = "crowd" + crowdIterations + ".wav"; }
 
 
     private void populate(int numSamples)//add samples to list to create crowd sound from
@@ -68,43 +68,42 @@ public class MixingBuffer {
 
             updateFilename();
 
-            int[] buffer = new int[bufferLength];//buffer of appropriate length - 8 bit issue?
+            short[] buffer = new short[bufferLength];//buffer of appropriate length - 8 bit issue?
 
             byte emptyByte = 0;
             Arrays.fill(buffer, emptyByte);//fill buffer with 0's
 
             populate(numSamples);//add files to sample list
 
-            LinkedList<byte[]> convertedFiles = new LinkedList<>();
+            LinkedList<short[]> convertedFiles = new LinkedList<>();
 
             Converter converter = new Converter();
 
             for(File f: files)
-                convertedFiles.add(converter.toByteArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(converter.toShortArray(f));//now have a list of the files in byte array form
 
 
             int offset = 0;//no offset for the very first file
 
             while(!convertedFiles.isEmpty())//until every sample has been added
             {
-                byte[] curr = convertedFiles.pop();//get a sample from list
+                short[] curr = convertedFiles.pop();//get a sample from list
 
 
                     for (int i =0; i < curr.length; i++)
                     {
-                        buffer[i] += curr[i];
+                       if(i+offset < bufferLength)
+                           buffer[i+offset] += curr[i];
                     }
 
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
-            byte[] bufferInBytes = converter.intToBytes(buffer);
+            byte[] bufferInBytes = converter.shortToByteArray(buffer);
 
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
             //need to create an audio file format object for this to work properly
-
-           //byte[] temp = fromInt(buffer);
 
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(bufferInBytes),format.getFormat(),bufferLength);
 
@@ -122,8 +121,8 @@ public class MixingBuffer {
     {
         Random rand = new Random();
 
-        return rand.nextInt(bufferLength)*95/100 % 4;
-        //return a number uniformly anywhere through (most of) the buffer
+        return rand.nextInt(bufferLength/2)*2;
+        //want an even value so that mixing high and low is avoided
     }
 
 
