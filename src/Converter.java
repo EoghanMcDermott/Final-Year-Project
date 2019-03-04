@@ -1,11 +1,6 @@
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 public class Converter {
 
