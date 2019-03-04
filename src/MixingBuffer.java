@@ -6,17 +6,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.*;
 
-public class MixingBuffer {
+public class MixingBuffer {//used to mix .WAV files together to make new .WAV file
 
     private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
     private static final int oneSecond = 176400/2;//1 second of 16bit 44.1khz of pcm audio
     private int bufferLength;
-    private int numSeconds;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
     private int crowdIterations = 0;
 
 
-    private void updateFilename()
+    private void updateFilename()//use to create new files rather than constantly overwrite one file only
     { filename = "crowd" + crowdIterations + ".wav"; }
 
 
@@ -54,8 +53,7 @@ public class MixingBuffer {
 
     private void setBufferLength(int seconds)
     {
-        numSeconds = seconds;//might be handy to globally keep track of this - if using clip method
-        bufferLength = oneSecond * seconds;
+         bufferLength = oneSecond * seconds;
     }
 
 
@@ -67,10 +65,10 @@ public class MixingBuffer {
 
             updateFilename();
 
-            short[] buffer = new short[bufferLength];//buffer of appropriate length - 8 bit issue?
+            short[] buffer = new short[bufferLength];//buffer of appropriate length
 
             byte emptyByte = 0;
-            Arrays.fill(buffer, emptyByte);//fill buffer with 0's
+            Arrays.fill(buffer, emptyByte);//fill buffer with 0's so += works okay
 
             populate(numSamples);//add files to sample list
 
@@ -79,7 +77,7 @@ public class MixingBuffer {
             Converter converter = new Converter();
 
             for(File f: files)
-                convertedFiles.add(converter.toShortArray(f));//now have a list of the files in byte array form
+                convertedFiles.add(converter.toShortArray(f));//now have a list of the files in short array form
 
 
             int offset = 0;//no offset for the very first file
@@ -91,14 +89,17 @@ public class MixingBuffer {
 
                     for (int i =0; i < curr.length; i++)
                     {
-                       if(i+offset < bufferLength)
+                       if(i+offset < bufferLength)//avoid out of bounds exception
                            buffer[i+offset] += curr[i];
+
+                       //need to add scaling if go over/under max/min short values
                     }
 
                offset = randomiseOffset();//next sample placed in a random location in the buffer
             }
 
             byte[] bufferInBytes = converter.shortToByteArray(buffer);
+            //convert back to byte[] so can write to new file with AudioSystem object
 
 
             AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
