@@ -54,7 +54,7 @@ public class UI{
         frame.add(infoPanel, BorderLayout.CENTER);
         frame.add(new JLabel(waveform), BorderLayout.NORTH);
 
-        JPanel parameterisation = new JPanel(new GridLayout(2, 1));
+        JPanel parameterisation = new JPanel(new GridLayout(3, 1));
         parameterisation.add(duration);
         parameterisation.add(numSamplesSlider);
         parameterisation.add(mfRatio);
