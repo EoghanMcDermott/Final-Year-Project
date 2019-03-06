@@ -3,16 +3,11 @@ import java.awt.*;
 
 public class Slider extends JPanel{
 
-    private JSlider sliderBar = new JSlider();
+    private JSlider sliderBar;
 
-    public Slider(String name, int increment)
+    public Slider(String name, int min, int max, int increment)
     {
-        int MIN = increment/10;
-        int MAX = increment;
-        int DEFAULT = increment/2;
-        //adjust values to fit as appropriate
-
-        sliderBar = new JSlider(MIN,MAX,DEFAULT);
+        sliderBar = new JSlider(min,max);
         setLayout(new BorderLayout());
 
         JLabel sliderLabel = new JLabel(name, JLabel.CENTER);
@@ -20,7 +15,7 @@ public class Slider extends JPanel{
         sliderBar.setOrientation(JSlider.HORIZONTAL);
 
         sliderBar.setMinorTickSpacing(1);
-        sliderBar.setMajorTickSpacing(5);
+        sliderBar.setMajorTickSpacing(increment);
         sliderBar.setPaintTicks(true);
         //dealing with border ticks
 

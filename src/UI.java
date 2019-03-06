@@ -12,11 +12,12 @@ public class UI{
 
     public UI()
     {
-        Slider numSamplesSlider = new Slider("Number of Samples", 50);
-        Slider duration = new Slider("Duration", 50);
-
         waveform = new ImageIcon("resources/images/waveform.JPG");
         //maybe can use praat to generate a proper waveform each time to display
+
+        Slider numSamplesSlider = new Slider("Number of Samples", 5,50,5);
+        Slider duration = new Slider("Duration", 5,30,5);
+        Slider mfRatio = new Slider("Male/Female Ratio", 0,100,10);
 
         frame.setSize(frameWidth,frameHeight);
         frame.setTitle("Synthesising the Sound of Crowds");
@@ -32,7 +33,7 @@ public class UI{
         generate.setSize(150,150);
         generate.addActionListener(e -> {
             infoPanel.displayString("Generating crowd...\n");
-            mixer.synthesise(numSamplesSlider.getValue(), duration.getValue());
+            mixer.synthesise(numSamplesSlider.getValue(), duration.getValue(), mfRatio.getValue());
 //            System.out.println(numSamplesSlider.getValue() + " samples");
 //            System.out.println(duration.getValue() + " seconds");
             infoPanel.displayString(mixer.getFiles());
@@ -56,6 +57,7 @@ public class UI{
         JPanel parameterisation = new JPanel(new GridLayout(2, 1));
         parameterisation.add(duration);
         parameterisation.add(numSamplesSlider);
+        parameterisation.add(mfRatio);
         parameterisation.setSize(720,150);
         frame.add(parameterisation, BorderLayout.SOUTH);
         //adding sliders to parameterise crowd

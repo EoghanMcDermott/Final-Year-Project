@@ -19,32 +19,40 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
     { filename = "crowd" + crowdIterations + ".wav"; }
 
 
-    private void populate(int numSamples)//add samples to list to create crowd sound from
+    private void populate(int numSamples, int mfRatio)//add samples to list to create crowd sound from
     {
         files.clear();//clear out any old files
 
         Random rand = new Random();
 
-        File dirMale = new File("resources/audio_samples/male/");
-        File dirFemale = new File("resources/audio_samples/female/");
+        File[] dirMale = new File("resources/audio_samples/male/").listFiles();
+        File[] dirFemale = new File("resources/audio_samples/female/").listFiles();
 
-        ArrayList<File> listFiles = new ArrayList<>();
+        List<File> temp = Arrays.asList(dirFemale);
+        Collections.shuffle(temp);
+        dirFemale = (File[]) temp.toArray();
 
-        for(File f: dirFemale.listFiles())
-            listFiles.add(f);
+        temp = Arrays.asList(dirMale);
+        Collections.shuffle(temp);
+        dirMale = (File[]) temp.toArray();
+        //shuffling both directories to get more varied results
 
-        for(File f: dirMale.listFiles())
-            listFiles.add(f);
-        //listfiles now contains all files from both male and female directories
-
+        int percentage = numSamples*mfRatio/100;
         int count = 0;
+
+        while(count < percentage)
+        {
+            int index = rand.nextInt(dirMale.length);
+            files.add(dirMale[index]);
+            count++;
+        }
 
         while (count < numSamples)
         {
-            int index = rand.nextInt(listFiles.size());
-            files.add(listFiles.get(index));
+            int index = rand.nextInt(dirFemale.length);
+            files.add(dirFemale[index]);
             count++;
-        }//randomly add samples to list
+        }//randomly add female samples to list
 
         Collections.shuffle(files);//shuffling said list to improve variability
 
@@ -57,7 +65,7 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
     }
 
 
-    public void synthesise(int numSamples, int duration) {//creates the synthesised crowd
+    public void synthesise(int numSamples, int duration, int mfRatio) {//creates the synthesised crowd
 
         try{
 
@@ -70,7 +78,7 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
             byte emptyByte = 0;
             Arrays.fill(buffer, emptyByte);//fill buffer with 0's so += works okay
 
-            populate(numSamples);//add files to sample list
+            populate(numSamples, mfRatio);//add files to sample list
 
             LinkedList<short[]> convertedFiles = new LinkedList<>();
 
