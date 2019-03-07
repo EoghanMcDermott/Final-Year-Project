@@ -17,7 +17,7 @@ public class UI{
 
         Slider numSamplesSlider = new Slider("Number of Samples", 5,50,5, 25);
         Slider duration = new Slider("Duration", 5,30,5, 10);
-        TextSlider mfRatio = new TextSlider("Female/Male Ratio", "Female","Male");
+        TextSlider mfRatio = new TextSlider("Male/Female Ratio", "Male","Female");
         TextSlider softVsLoud = new TextSlider("Soft - Loud", "Soft", "Loud");
         //setup sliders to allow for parameterisation
 

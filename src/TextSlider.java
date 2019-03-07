@@ -21,7 +21,7 @@ public class TextSlider extends JPanel
         //dealing with border ticks
 
         Hashtable labelTable = new Hashtable();
-        labelTable.put( new Integer( 0 ), new JLabel(left));
+        labelTable.put( new Integer( 1 ), new JLabel(left));
         labelTable.put( new Integer( 100 ), new JLabel(right));
         //
 
