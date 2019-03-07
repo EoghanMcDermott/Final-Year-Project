@@ -28,37 +28,82 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
         HashMap<String,File[]> maleDirs = new HashMap<>();
         HashMap<String,File[]> femaleDirs = new HashMap<>();
 
-        File[] temp;
+        File[] tempDir;
 
-        temp = new File("resources/audio_samples/male/soft").listFiles();
-        maleDirs.put("soft", temp);
-        temp = new File("resources/audio_samples/male/normal").listFiles();
-        maleDirs.put("normal", temp);
-        temp = new File("resources/audio_samples/male/loud").listFiles();
-        maleDirs.put("loud", temp);
+        tempDir = new File("resources/audio_samples/male/soft").listFiles();
+        maleDirs.put("soft", tempDir);
+        tempDir = new File("resources/audio_samples/male/normal").listFiles();
+        maleDirs.put("normal", tempDir);
+        tempDir = new File("resources/audio_samples/male/loud").listFiles();
+        maleDirs.put("loud", tempDir);
 
-        temp =  new File("resources/audio_samples/female/soft").listFiles();
-        femaleDirs.put("soft", temp);
-        temp =  new File("resources/audio_samples/female/normal").listFiles();
-        femaleDirs.put("normal", temp);
-        temp =  new File("resources/audio_samples/female/loud").listFiles();
-        femaleDirs.put("loud", temp);
+        tempDir =  new File("resources/audio_samples/female/soft").listFiles();
+        femaleDirs.put("soft", tempDir);
+        tempDir =  new File("resources/audio_samples/female/normal").listFiles();
+        femaleDirs.put("normal", tempDir);
+        tempDir =  new File("resources/audio_samples/female/loud").listFiles();
+        femaleDirs.put("loud", tempDir);
         //populating hash maps for male and female audio samples
 
 
-        int percentageSoftLoud = numSamples*softVsLoud/100;
-        int percentageMF = numSamples*mfRatio/100;
-        int count = 0;
+        int percentageSoftLoud = softVsLoud/100;//low value for soft, high for loud
+        int percentageMF = mfRatio/100;
 
-        while(count < percentageMF)
+        int totalFemale = numSamples * percentageMF;
+        int numFemaleSoft = totalFemale * (1-percentageSoftLoud) *80/100;//leave some headroom for normal samples?
+        int numFemaleLoud = totalFemale * percentageSoftLoud *80/100;
+        int numFemaleNorm = totalFemale - numFemaleSoft - numFemaleLoud;
+        
+
+        int totalMale = numSamples - totalFemale;
+        int numMaleSoft = totalMale * (1-percentageSoftLoud) *80/100;
+        int numMaleLoud = totalMale * percentageSoftLoud *80/100;
+        int numMaleNorm = totalMale - numMaleSoft - numFemaleLoud;
+        //calculating amount of a sample type to add for each category - formulae might need work
+
+        tempDir = femaleDirs.get("soft");//adding soft female samples
+        for(int i=0;i<numFemaleSoft;i++)
         {
-
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
         }
 
-        while (count < numSamples)
+        tempDir = femaleDirs.get("normal");//adding normal male samples
+        for(int i=0;i<numFemaleNorm;i++)
         {
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
+        }
 
-        }//randomly add female samples to list
+        tempDir = femaleDirs.get("loud");//adding loud female samples
+        for(int i=0;i<numFemaleLoud;i++)
+        {
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
+        }
+
+        tempDir = maleDirs.get("soft");//adding soft male samples
+        for(int i=0;i<numMaleSoft;i++)
+        {
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
+        }
+
+        tempDir = maleDirs.get("normal");//adding normal male samples
+        for(int i=0;i<numMaleNorm;i++)
+        {
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
+        }
+
+        tempDir = maleDirs.get("loud");//adding loud male samples
+        for(int i=0;i<numMaleLoud;i++)
+        {
+            int index = rand.nextInt(tempDir.length);
+            files.add(tempDir[index]);
+        }
+        //should have properly added the right amount of samples now
+        
 
         Collections.shuffle(files);//shuffling said list to improve variability
 

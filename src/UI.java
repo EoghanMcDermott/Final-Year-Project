@@ -19,6 +19,7 @@ public class UI{
         Slider duration = new Slider("Duration", 5,30,5, 10);
         TextSlider mfRatio = new TextSlider("Female/Male Ratio", "Female","Male");
         TextSlider softVsLoud = new TextSlider("Soft - Loud", "Soft", "Loud");
+        //setup sliders to allow for parameterisation
 
         frame.setSize(frameWidth,frameHeight);
         frame.setTitle("Synthesising the Sound of Crowds");
@@ -35,8 +36,6 @@ public class UI{
         generate.addActionListener(e -> {
             infoPanel.displayString("Generating crowd...\n");
             mixer.synthesise(numSamplesSlider.getValue(), duration.getValue(), mfRatio.getValue(), softVsLoud.getValue());
-//            System.out.println(numSamplesSlider.getValue() + " samples");
-//            System.out.println(duration.getValue() + " seconds");
             infoPanel.displayString(mixer.getFiles());
             infoPanel.displayString("Crowd Generated");
         });
@@ -50,6 +49,7 @@ public class UI{
         });
         //play button for our new crowd sound
 
+        //arranging things in the overall ui panel
         frame.add(generate, BorderLayout.WEST);
         frame.add(playButton, BorderLayout.EAST);
         frame.add(infoPanel, BorderLayout.CENTER);
@@ -65,8 +65,6 @@ public class UI{
         //adding sliders to parameterise crowd
 
         frame.setVisible(true);
-
-        //(poorly) arranging things in the overall ui panel
     }
 
 }
