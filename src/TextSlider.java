@@ -1,13 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Hashtable;
 
-public class Slider extends JPanel{
-
+public class TextSlider extends JPanel
+{
     private JSlider sliderBar;
 
-    public Slider(String name, int min, int max, int increment, int start)
+    public TextSlider(String name, String left, String right)
     {
-        sliderBar = new JSlider(min,max,start);
+        sliderBar = new JSlider();
         setLayout(new BorderLayout());
 
         JLabel sliderLabel = new JLabel(name, JLabel.CENTER);
@@ -15,12 +16,18 @@ public class Slider extends JPanel{
         sliderBar.setOrientation(JSlider.HORIZONTAL);
 
         sliderBar.setMinorTickSpacing(1);
-        sliderBar.setMajorTickSpacing(increment);
+        sliderBar.setMajorTickSpacing(10);
         sliderBar.setPaintTicks(true);
         //dealing with border ticks
 
+        Hashtable labelTable = new Hashtable();
+        labelTable.put( new Integer( 0 ), new JLabel(left));
+        labelTable.put( new Integer( 100 ), new JLabel(right));
+        //
+
+        sliderBar.setLabelTable(labelTable);
         sliderBar.setPaintLabels(true);
-        //adding numeric values instead of just ticks
+        //adding text values
 
         setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
