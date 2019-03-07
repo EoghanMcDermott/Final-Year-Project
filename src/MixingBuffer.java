@@ -51,15 +51,25 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
 
         //works okay with male - if female > 50% it goes all female
 
+//        int totalFemale = numSamples / (100 /mfRatio);
+//        int numFemaleSoft = (totalFemale / (100 / softLoud)) * 4 / 5;//leave some headroom for normal samples?
+//        int numFemaleLoud = (totalFemale * softLoud) / 100 * 4 / 5;
+//        int numFemaleNorm = totalFemale - numFemaleSoft - numFemaleLoud;
+//
+//        int totalMale = numSamples - totalFemale;
+//        int numMaleSoft = (totalMale / (100 / softLoud)) * 4 / 5;
+//        int numMaleLoud = (totalMale * softLoud) / 100 * 4 / 5;
+//        int numMaleNorm = totalMale - numMaleSoft - numMaleLoud;
         int totalFemale = numSamples / (100 /mfRatio);
-        int numFemaleSoft = (totalFemale / (100 / softLoud)) * 4 / 5;//leave some headroom for normal samples?
-        int numFemaleLoud = (totalFemale * softLoud) / 100 * 4 / 5;
-        int numFemaleNorm = totalFemale - numFemaleSoft - numFemaleLoud;
+        int numFemaleSoft = totalFemale/3;//leave some headroom for normal samples?
+        int numFemaleLoud = totalFemale/3;
+        int numFemaleNorm = totalFemale/3;
 
         int totalMale = numSamples - totalFemale;
-        int numMaleSoft = (totalMale / (100 / softLoud)) * 4 / 5;
-        int numMaleLoud = (totalMale * softLoud) / 100 * 4 / 5;
-        int numMaleNorm = totalMale - numMaleSoft - numMaleLoud;
+        int numMaleSoft = totalMale/3;
+        int numMaleLoud = totalMale/3;
+        int numMaleNorm = totalMale/3;
+
 
         //calculating amount of a sample type to add for each category - formulae might need work
 
@@ -67,10 +77,10 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
         System.out.println("Loud Female: " + numFemaleLoud);
         System.out.println("Soft Female: " + numFemaleSoft);
         System.out.println("Normal Female: " + numFemaleNorm);
-        System.out.println("Total Male: " + totalMale);
+        System.out.println("\nTotal Male: " + totalMale);
         System.out.println("Loud Male: " + numMaleLoud);
-        System.out.println("Soft Female: " + numMaleSoft);
-        System.out.println("Normal Female: " + numMaleNorm + "\n\n");
+        System.out.println("Soft Male: " + numMaleSoft);
+        System.out.println("Normal Male: " + numMaleNorm + "\n\n");
 
 
         tempDir = femaleDirs.get("soft");//adding soft female samples
