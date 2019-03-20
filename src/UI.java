@@ -5,8 +5,8 @@ public class UI{
 
     private JFrame frame = new JFrame();
     private InfoPanel infoPanel = new InfoPanel();
-    private static final int frameWidth = 720;
-    private static final int frameHeight = 480;
+    private static final int frameWidth = 1920;
+    private static final int frameHeight = 1080;
     private MixingBuffer mixer = new MixingBuffer();
     private ImageIcon waveform;
 
@@ -15,7 +15,7 @@ public class UI{
         waveform = new ImageIcon("resources/images/waveform.JPG");
         //maybe can use praat to generate a proper waveform each time to display
 
-        Slider numSamplesSlider = new Slider("Number of Samples", 25,75,5, 50);
+        Slider numSamplesSlider = new Slider("Number of Samples", 50,150,10, 75);
         Slider duration = new Slider("Duration", 0,20,5, 10);
         TextSlider mfRatio = new TextSlider("Male/Female Ratio", "Male","Female");
         TextSlider softVsLoud = new TextSlider("Soft - Loud", "Soft", "Loud");
@@ -54,6 +54,7 @@ public class UI{
         frame.add(playButton, BorderLayout.EAST);
         frame.add(infoPanel, BorderLayout.CENTER);
         frame.add(new JLabel(waveform), BorderLayout.NORTH);
+
 
         JPanel parameterisation = new JPanel(new GridLayout(2, 2));
         parameterisation.add(duration);
