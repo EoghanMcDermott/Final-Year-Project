@@ -8,7 +8,7 @@ import java.util.*;
 
 public class MixingBuffer {//used to mix .WAV files together to make new .WAV file
 
-    private ArrayList<File> files = new ArrayList<>();//instantiate list so can add to it
+    private ArrayList<File> samples = new ArrayList<>();//instantiate list so can add to it
     private static final int oneSecond = 176400/2;//1 second of 16bit 44.1khz of pcm audio
     private int bufferLength;
     private String filename = "crowd.wav";//might want to change this later to reflect the type of crowd
@@ -21,7 +21,7 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
 
     private void populate(int numSamples, int mfRatio, int softLoud)//add samples to list to create crowd sound from
     {
-        files.clear();//clear out any old files
+        samples.clear();//clear out any old samples
 
         Random rand = new Random();
 
@@ -45,89 +45,103 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
         femaleDirs.put("loud", tempDir);
         //populating hash maps for male and female audio samples
 
-        if(mfRatio == 0)//if we want a higher percentage of women than men
-            mfRatio++;
+        double malePercentage = (100- mfRatio)/100.0;
+        double femalePercentage = mfRatio/100.0;
+        //low value = more men and vice versa
 
+        int totalMale = (int) (numSamples * malePercentage);
+        int totalFemale = (int) (numSamples * femalePercentage);
+        //calculating how many samples per gender
 
-        //works okay with male - if female > 50% it goes all female
+        //now need to calculate what percentage of soft and loud are
+        double softPercentage = (100-softLoud)/100.0;
+        double loudPercentage = softLoud/100.0;
+        //low value = more soft than loud
 
-//        int totalFemale = numSamples / (100 /mfRatio);
-//        int numFemaleSoft = (totalFemale / (100 / softLoud)) * 4 / 5;//leave some headroom for normal samples?
-//        int numFemaleLoud = (totalFemale * softLoud) / 100 * 4 / 5;
-//        int numFemaleNorm = totalFemale - numFemaleSoft - numFemaleLoud;
-//
-//        int totalMale = numSamples - totalFemale;
-//        int numMaleSoft = (totalMale / (100 / softLoud)) * 4 / 5;
-//        int numMaleLoud = (totalMale * softLoud) / 100 * 4 / 5;
-//        int numMaleNorm = totalMale - numMaleSoft - numMaleLoud;
-        int totalFemale = numSamples / (100 /mfRatio);
-        int numFemaleSoft = totalFemale/3;//leave some headroom for normal samples?
-        int numFemaleLoud = totalFemale/3;
-        int numFemaleNorm = totalFemale/3;
+        int totalMaleSoft = (int) (totalMale * softPercentage);
+        int totalMaleLoud = (int) (totalMale * loudPercentage);
 
-        int totalMale = numSamples - totalFemale;
-        int numMaleSoft = totalMale/3;
-        int numMaleLoud = totalMale/3;
-        int numMaleNorm = totalMale/3;
+        int totalFemaleSoft = (int) (totalFemale * softPercentage);
+        int totalFemaleLoud = (int) (totalFemale * loudPercentage);
+        //calculating number of male & female samples of each type
 
+        int totalMaleNormal,totalFemaleNormal;
 
-        //calculating amount of a sample type to add for each category - formulae might need work
-
-        System.out.println("Total Female: " + totalFemale);
-        System.out.println("Loud Female: " + numFemaleLoud);
-        System.out.println("Soft Female: " + numFemaleSoft);
-        System.out.println("Normal Female: " + numFemaleNorm);
-        System.out.println("\nTotal Male: " + totalMale);
-        System.out.println("Loud Male: " + numMaleLoud);
-        System.out.println("Soft Male: " + numMaleSoft);
-        System.out.println("Normal Male: " + numMaleNorm + "\n\n");
-
-
-        tempDir = femaleDirs.get("soft");//adding soft female samples
-        for(int i=0;i<numFemaleSoft && i<tempDir.length;i++)
+        if(softPercentage < loudPercentage)//if more loud
         {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
-        }
+            totalFemaleNormal = totalFemaleLoud/2;
+            totalMaleNormal = totalMaleLoud/2;
 
-        tempDir = femaleDirs.get("normal");//adding normal male samples
-        for(int i=0;i<numFemaleNorm && i<tempDir.length;i++)
-        {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
+            totalFemaleSoft = totalFemale - totalFemaleLoud - totalFemaleNormal;//half as many normal samples as the more dominant in soft vs loud
+            totalMaleSoft = totalMale - totalMaleLoud - totalMaleNormal;
         }
+        else if(softPercentage > loudPercentage)//if more soft
+        {
+            totalFemaleNormal = totalFemaleSoft/2;
+            totalMaleNormal = totalMaleSoft/2;
 
-        tempDir = femaleDirs.get("loud");//adding loud female samples
-        for(int i=0;i<numFemaleLoud && i<tempDir.length;i++)
-        {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
-        }
+            totalFemaleLoud = totalFemale - totalFemaleSoft - totalFemaleNormal;
+            totalMaleLoud = totalMale - totalMaleSoft - totalMaleNormal;
 
-        tempDir = maleDirs.get("soft");//adding soft male samples
-        for(int i=0;i<numMaleSoft && i<tempDir.length;i++)
-        {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
         }
+        else//if even split
+        {
+            totalFemaleNormal = totalFemale/2;
+            totalMaleNormal = totalMale/2;
 
-        tempDir = maleDirs.get("normal");//adding normal male samples
-        for(int i=0;i<numMaleNorm && i<tempDir.length;i++)
-        {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
-        }
+            totalFemaleSoft = totalFemale/4;
+            totalFemaleLoud = totalFemale/4;
 
-        tempDir = maleDirs.get("loud");//adding loud male samples
-        for(int i=0;i<numMaleLoud && i<tempDir.length;i++)
-        {
-            int index = rand.nextInt(tempDir.length);
-            files.add(tempDir[index]);
-        }
-        //should have properly added the right amount of samples now
+            totalMaleSoft = totalMale/4;
+            totalMaleLoud = totalMale/4;
+        }//mainly normal with even soft and loud - resembles a bell curve
+
+
+        //adding in the various types of female samples - NOT SUPER EFFICIENT
+        tempDir = femaleDirs.get("soft");
+        for(int i=0; i<totalFemaleSoft;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length-1)]);
+
+
+        tempDir = femaleDirs.get("loud");
+        for(int i=0; i<totalFemaleLoud;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length - 1)]);
+
+       //fill rest of samples needed with normal
+        tempDir = femaleDirs.get("normal");
+        for(int i=0; i<totalFemaleNormal;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length - 1)]);
+        //female samples all added
+
+        //time to add male samples
+        tempDir = maleDirs.get("soft");
+        for(int i=0; i<totalMaleSoft;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length - 1)]);
+
+
+        tempDir = maleDirs.get("loud");
+        for(int i=0; i<totalMaleLoud;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length - 1)]);
+
+
+        //fill rest of samples needed with normal
+        tempDir = maleDirs.get("normal");
+        for(int i=0; i<totalMaleNormal;i++)
+            samples.add(tempDir[rand.nextInt(tempDir.length - 1)]);
         
+        //have now added all the samples from the various categories to the overall list
 
-        Collections.shuffle(files);//shuffling said list to improve variability
+
+        Collections.shuffle(samples);//shuffling said list to improve variability
+        
+        //debug info
+        System.out.println("Total Female: " + totalFemale + "   Total Male: " + totalMale);
+        System.out.println("Soft Female: " + totalFemaleSoft);
+        System.out.println("Loud Female: " + totalFemaleLoud);
+        System.out.println("Normal Female: " + totalFemaleNormal);
+        System.out.println("Soft Male: " + totalMaleSoft);
+        System.out.println("Loud Male: " + totalMaleLoud);
+        System.out.println("Normal Male: " + totalMaleNormal + "\n\n");
 
     } //can use this to vary list of samples rather than everything in all together
 
@@ -151,14 +165,14 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
             byte emptyByte = 0;
             Arrays.fill(buffer, emptyByte);//fill buffer with 0's so += works okay
 
-            populate(numSamples, mfRatio, softVsLoud);//add files to sample list
+            populate(numSamples, mfRatio, softVsLoud);//add samples to sample list
 
             LinkedList<short[]> convertedFiles = new LinkedList<>();
 
             Converter converter = new Converter();
 
-            for(File f: files)
-                convertedFiles.add(converter.toShortArray(f));//now have a list of the files in short array form
+            for(File f: samples)
+                convertedFiles.add(converter.toShortArray(f));//now have a list of the samples in short array form
 
 
             int offset = 0;//no offset for the very first file
@@ -183,14 +197,14 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
             //convert back to byte[] so can write to new file with AudioSystem object
 
 
-            AudioFileFormat format = AudioSystem.getAudioFileFormat(files.get(0));
+            AudioFileFormat format = AudioSystem.getAudioFileFormat(samples.get(0));
             //need to create an audio file format object for this to work properly
 
             AudioInputStream out = new AudioInputStream(new ByteArrayInputStream(bufferInBytes),format.getFormat(),bufferLength);
 
             AudioSystem.write(out, AudioFileFormat.Type.WAVE, new File(filename));//writing the out buffer to a file
 
-            crowdIterations++;//don't want weird overlapping files
+            crowdIterations++;//don't want weird overlapping samples
         }
         catch (Exception e){
             e.printStackTrace();
@@ -228,11 +242,11 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
     {return filename;}
 
 
-    public String getFiles()//list files to display in ui
+    public String getFiles()//list samples to display in ui
     {
         String str = "";
 
-        for(File f: files)
+        for(File f: samples)
             str += f.toString() + "\n";
 
         return str;
