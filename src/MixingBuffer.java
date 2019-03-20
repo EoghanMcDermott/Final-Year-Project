@@ -69,10 +69,16 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
 
         if(softPercentage < loudPercentage)//if more loud
         {
-            totalFemaleNormal = totalFemaleLoud/2;
+            totalFemaleNormal = totalFemaleLoud/2;//half as many normal samples as the more dominant in soft vs loud
             totalMaleNormal = totalMaleLoud/2;
 
-            totalFemaleSoft = totalFemale - totalFemaleLoud - totalFemaleNormal;//half as many normal samples as the more dominant in soft vs loud
+            while(totalFemaleLoud + totalFemaleNormal > totalFemale)
+                totalFemaleNormal--;//avoiding going over the total number
+
+            while(totalMaleLoud + totalMaleNormal > totalMale)
+                totalMaleNormal--;
+
+            totalFemaleSoft = totalFemale - totalFemaleLoud - totalFemaleNormal;//adjusting so there aren't any negative values
             totalMaleSoft = totalMale - totalMaleLoud - totalMaleNormal;
         }
         else if(softPercentage > loudPercentage)//if more soft
@@ -80,9 +86,14 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
             totalFemaleNormal = totalFemaleSoft/2;
             totalMaleNormal = totalMaleSoft/2;
 
+            while(totalFemaleSoft + totalFemaleNormal > totalFemale)
+                totalFemaleNormal--;
+
+            while(totalMaleSoft + totalMaleNormal > totalMale)
+                totalMaleNormal--;
+
             totalFemaleLoud = totalFemale - totalFemaleSoft - totalFemaleNormal;
             totalMaleLoud = totalMale - totalMaleSoft - totalMaleNormal;
-
         }
         else//if even split
         {
@@ -95,6 +106,8 @@ public class MixingBuffer {//used to mix .WAV files together to make new .WAV fi
             totalMaleSoft = totalMale/4;
             totalMaleLoud = totalMale/4;
         }//mainly normal with even soft and loud - resembles a bell curve
+
+
 
 
         //adding in the various types of female samples - NOT SUPER EFFICIENT
