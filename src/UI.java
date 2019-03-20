@@ -15,8 +15,8 @@ public class UI{
         waveform = new ImageIcon("resources/images/waveform.JPG");
         //maybe can use praat to generate a proper waveform each time to display
 
-        Slider numSamplesSlider = new Slider("Number of Samples", 5,50,5, 25);
-        Slider duration = new Slider("Duration", 5,30,5, 10);
+        Slider numSamplesSlider = new Slider("Number of Samples", 25,75,5, 50);
+        Slider duration = new Slider("Duration", 0,20,5, 10);
         TextSlider mfRatio = new TextSlider("Male/Female Ratio", "Male","Female");
         TextSlider softVsLoud = new TextSlider("Soft - Loud", "Soft", "Loud");
         //setup sliders to allow for parameterisation
