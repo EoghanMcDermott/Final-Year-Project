@@ -2,13 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Hashtable;
 
-public class TextSlider extends JPanel
+public class TextSlider extends JPanel //slider but with text labels rather than numbers
 {
     private JSlider sliderBar;
 
     public TextSlider(String name, String left, String right)
     {
-        sliderBar = new JSlider();
+        sliderBar = new JSlider();//using jslider swing object
         setLayout(new BorderLayout());
 
         JLabel sliderLabel = new JLabel(name, JLabel.CENTER);
@@ -23,7 +23,7 @@ public class TextSlider extends JPanel
         Hashtable labelTable = new Hashtable();
         labelTable.put( new Integer( 1 ), new JLabel(left));
         labelTable.put( new Integer( 100 ), new JLabel(right));
-        //
+        //using hash table to store the different text labels for the slider
 
         sliderBar.setLabelTable(labelTable);
         sliderBar.setPaintLabels(true);
@@ -36,7 +36,8 @@ public class TextSlider extends JPanel
         //display title of slider then actual slider underneath
     }
 
-    public int getValue() {
+    public int getValue()//used to pass values from ui
+    {
         return sliderBar.getValue();
     }
 }

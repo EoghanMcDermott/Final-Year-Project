@@ -13,7 +13,7 @@ public class UI{
     public UI()
     {
         waveform = new ImageIcon("resources/images/waveform.JPG");
-        //maybe can use praat to generate a proper waveform each time to display
+        //audio waveform
 
         Slider numSamplesSlider = new Slider("Number of Samples", 50,150,10, 75);
         Slider duration = new Slider("Duration", 0,20,5, 10);
