@@ -70,4 +70,41 @@ public class Converter {//used to convert .WAV files to different primitive data
 
         return null;//encountered a problem with converting the file to byte array
     }
+
+    public byte[] intToByteArray(int[] input)//will use to convert buffer to something writable with sound api
+    {
+        short[] scaled = intToShortArray(input);
+
+        return shortToByteArray(scaled);
+    }
+
+
+    public short[] intToShortArray(int[] input)//scale int value to fit in short - avoiding overflow
+    {
+        short[] output = new short[input.length];
+
+        double max = (double) findMax(input);//find max in original int array
+
+        double scaleFactor = (max - Short.MAX_VALUE)/max;//use that max value to scale other values in int array
+
+        for(int i=0;i<input.length;i++)
+        {
+            output[i] = (short) (input[i]*scaleFactor);//cast scaled values to short as they are within range short can hold
+        }
+
+        return output;
+    }
+
+    private int findMax(int[] array)//simple method to find largest value in array
+    {
+        int max = 0;
+
+        for(int i: array)
+        {
+            if(i>max)
+                max = i;
+        }
+
+        return max;
+    }
 }
