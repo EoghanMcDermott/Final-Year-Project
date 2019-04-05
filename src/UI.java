@@ -5,8 +5,8 @@ public class UI{
 
     private JFrame frame = new JFrame();
     private InfoPanel infoPanel = new InfoPanel();
-    private static final int frameWidth = 1920;
-    private static final int frameHeight = 1080;
+    private static final int frameWidth = 1280;
+    private static final int frameHeight = 720;
     private MixingBuffer mixer = new MixingBuffer();
     private ImageIcon waveform;
 
